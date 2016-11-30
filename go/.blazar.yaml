@@ -7,7 +7,7 @@ env:
   PATH: '$PATH:$GOPATH/bin'
   GOPATH: '$WORKSPACE/work'
 
-buildSteps:
+steps:
   - description: Ignore cloned stuff because this build is weird
     commands:
       - rm -rf $WORKSPACE/*
@@ -16,7 +16,7 @@ buildSteps:
     commands:
        - mkdir -p $GOPATH/src $GOPATH/bin $GOPATH/pkg
        - git clone git@github.com:youtube/vitess.git $GOPATH/src/github.com/youtube/vitess
-       
+
   - description: fetch deps
     commands:
       - |
@@ -28,9 +28,9 @@ buildSteps:
 
   - description: Check it worked
     commands:
-      - ls -al $GOPATH/bin 
+      - ls -al $GOPATH/bin
 
-  - description: Package and Upload Deployables 
+  - description: Package and Upload Deployables
     name: uploadDeployable
     activeByDefault: false
     commands:

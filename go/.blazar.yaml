@@ -9,10 +9,8 @@ env:
 steps:
   - description: Set up custom vitess workspace -- move our clone of the repo into the expected place
     commands:
-       - mkdir $WORKSPACE/work/src/github.com/youtube/vitess
-       - cp -r $WORKSPACE/vitess/*  $WORKSPACE/work/src/github.com/youtube/vitess/
-       - mv /tmp/work $WORKSPACE
-       - mkdir -p $GOPATH/bin $GOPATH/pkg
+       - mkdir -p $GOPATH/src/github.com/youtube/vitess && $GOPATH/bin/ $GOPATH/pkg
+       - cp -r $WORKSPACE/vitess/*  $GOPATH/src/github.com/youtube/vitess/
 
   - description: fetch deps
     commands:

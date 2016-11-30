@@ -4,8 +4,14 @@ buildDeps:
   - hs-build-tools
 
 env:
-  PATH: '$PATH:$GOPATH/bin'
   GOPATH: '$WORKSPACE/work'
+
+before:
+    - description:
+      commands:
+        - command: /bin/cat $0
+          env:
+            PATH: '$PATH:$GOPATH/bin'
 
 steps:
   - description: Ignore cloned stuff because this build is weird

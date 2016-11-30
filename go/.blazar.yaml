@@ -11,7 +11,7 @@ steps:
     commands:
        - mkdir $GOPATH
        - mkdir -p $GOPATH/bin/ $GOPATH/pkg $GOPATH/src/github.com/youtube/vitess
-       - cp -r $WORKSPACE/vitess/*  $GOPATH/src/github.com/youtube/vitess/
+       - cp -r $WORKSPACE/*  $GOPATH/src/github.com/youtube/vitess/
 
   - description: fetch deps
     commands:

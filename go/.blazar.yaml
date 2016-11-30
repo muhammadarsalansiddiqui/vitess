@@ -5,6 +5,7 @@ buildDeps:
 
 env:
   GOPATH: '/usr/share/hubspot/build/workspace/work'
+  GOROOT: '/usr/lib/golang/bin'
 
 steps:
   - description: Set up custom vitess workspace -- move our clone of the repo into the expected place

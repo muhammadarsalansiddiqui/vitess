@@ -6,13 +6,6 @@ buildDeps:
 env:
   GOPATH: '$WORKSPACE/work'
 
-before:
-    - description:
-      commands:
-        - command: /bin/cat $0
-          env:
-            PATH: '$PATH:$GOPATH/bin'
-
 steps:
   - description: Ignore cloned stuff because this build is weird
     commands:
@@ -26,6 +19,7 @@ steps:
   - description: fetch deps
     commands:
       - |
+          export PATH="$GOPATH/bin:$PATH"
           cd $GOPATH/src/github.com/youtube/vitess
           go get -u github.com/golang/lint/golint github.com/golang/mock/mockgen github.com/kardianos/govendor golang.org/x/tools/cmd/goimports honnef.co/go/unused/cmd/unused code.google.com/p/go.tools/cmd/cover
           govendor sync
@@ -45,4 +39,4 @@ steps:
 
 stepActivation:
   uploadDeployable:
-    branches: [some-branch]
+    branches: [hubspot]

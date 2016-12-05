@@ -87,12 +87,11 @@ func RegisterFlags(flags DBConfigFlag) DBConfigFlag {
 
 // initConnParams may overwrite the socket file,
 // and refresh the password to check that works.
-func initConnParams(cp *sqldb.ConnParams, socketFile string) error {
+func initConnParams(cp *sqldb.ConnParams, socketFile string) (sqldb.ConnParams, error) {
 	if socketFile != "" {
 		cp.UnixSocket = socketFile
 	}
-	_, err := MysqlParams(cp)
-	return err
+	return MysqlParams(cp)
 }
 
 // MysqlParams returns a copy of our ConnParams that we can use
@@ -159,28 +158,38 @@ func Init(socketFile string, flags DBConfigFlag) (DBConfigs, error) {
 		panic("No DB config is provided.")
 	}
 	if AppConfig&flags != 0 {
-		if err := initConnParams(&dbConfigs.App, socketFile); err != nil {
+		if app, err := initConnParams(&dbConfigs.App, socketFile); err != nil {
 			return DBConfigs{}, fmt.Errorf("app dbconfig cannot be initialized: %v", err)
+		} else {
+			dbConfigs.App = app
 		}
 	}
 	if AllPrivsConfig&flags != 0 {
-		if err := initConnParams(&dbConfigs.AllPrivs, socketFile); err != nil {
+		if allPrivs, err := initConnParams(&dbConfigs.AllPrivs, socketFile); err != nil {
 			return DBConfigs{}, fmt.Errorf("allprivs dbconfig cannot be initialized: %v", err)
+		} else {
+			dbConfigs.AllPrivs = allPrivs;
 		}
 	}
 	if DbaConfig&flags != 0 {
-		if err := initConnParams(&dbConfigs.Dba, socketFile); err != nil {
+		if dba, err := initConnParams(&dbConfigs.Dba, socketFile); err != nil {
 			return DBConfigs{}, fmt.Errorf("dba dbconfig cannot be initialized: %v", err)
+		} else {
+			dbConfigs.Dba = dba
 		}
 	}
 	if FilteredConfig&flags != 0 {
-		if err := initConnParams(&dbConfigs.Filtered, socketFile); err != nil {
+		if filtered, err := initConnParams(&dbConfigs.Filtered, socketFile); err != nil {
 			return DBConfigs{}, fmt.Errorf("filtered dbconfig cannot be initialized: %v", err)
+		} else {
+			dbConfigs.Filtered = filtered
 		}
 	}
 	if ReplConfig&flags != 0 {
-		if err := initConnParams(&dbConfigs.Repl, socketFile); err != nil {
+		if repl, err := initConnParams(&dbConfigs.Repl, socketFile); err != nil {
 			return DBConfigs{}, fmt.Errorf("repl dbconfig cannot be initialized: %v", err)
+		} else {
+			dbConfigs.Repl = repl
 		}
 	}
 	// the Dba connection is not linked to a specific database

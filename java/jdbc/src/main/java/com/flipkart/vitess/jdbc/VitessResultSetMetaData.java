@@ -1,15 +1,15 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.Constants;
-import com.flipkart.vitess.util.MysqlDefs;
-import com.google.common.collect.ImmutableList;
-import com.youtube.vitess.proto.Query;
-
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 import java.util.logging.Logger;
+
+import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.MysqlDefs;
+import com.google.common.collect.ImmutableList;
+import com.youtube.vitess.proto.Query;
 
 
 /**
@@ -80,7 +80,7 @@ public class VitessResultSetMetaData implements ResultSetMetaData {
     }
 
     public String getTableName(int column) throws SQLException {
-        return null;
+        return getField(column).getTable();
     }
 
     public String getCatalogName(int column) throws SQLException {

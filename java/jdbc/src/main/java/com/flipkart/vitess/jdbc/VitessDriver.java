@@ -1,10 +1,15 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.Constants;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import com.flipkart.vitess.util.Constants;
 
 /**
  * Created by harshit.gangal on 23/01/16.
@@ -91,8 +96,6 @@ public class VitessDriver implements Driver {
                 new DriverPropertyInfo(Constants.Property.USERNAME, vitessJDBCUrl.getUsername());
             dpi[6].required = false;
             dpi[6].description = Constants.USERNAME_DESC;
-
-
         } else {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_CONN_URL + " : " + url);
         }

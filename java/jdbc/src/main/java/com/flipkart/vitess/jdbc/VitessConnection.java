@@ -1,13 +1,5 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.CommonUtils;
-import com.flipkart.vitess.util.Constants;
-import com.flipkart.vitess.util.MysqlDefs;
-import com.youtube.vitess.client.Context;
-import com.youtube.vitess.client.VTGateConn;
-import com.youtube.vitess.client.VTGateTx;
-import com.youtube.vitess.proto.Topodata;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -34,6 +26,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
+
+import com.flipkart.vitess.util.CommonUtils;
+import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.MysqlDefs;
+import com.youtube.vitess.client.Context;
+import com.youtube.vitess.client.VTGateConn;
+import com.youtube.vitess.client.VTGateTx;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by harshit.gangal on 23/01/16.
@@ -843,7 +843,7 @@ public class VitessConnection implements Connection {
     }
 
     public Context createContext(long deadlineAfter) {
-        return CommonUtils.createContext(this.vitessJDBCUrl.getUsername(), deadlineAfter);
+        return CommonUtils.createContext(this.vitessJDBCUrl.getUsername(), this.vitessJDBCUrl.isExcludeFieldMetadata(), deadlineAfter);
     }
 
     public String getUsername() {

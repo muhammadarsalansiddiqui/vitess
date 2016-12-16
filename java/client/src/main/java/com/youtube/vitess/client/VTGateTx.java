@@ -2,11 +2,15 @@ package com.youtube.vitess.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import com.youtube.vitess.client.cursor.Cursor;
 import com.youtube.vitess.client.cursor.SimpleCursor;
 import com.youtube.vitess.proto.Topodata.KeyRange;
@@ -32,11 +36,6 @@ import com.youtube.vitess.proto.Vtgate.ExecuteShardsResponse;
 import com.youtube.vitess.proto.Vtgate.RollbackRequest;
 import com.youtube.vitess.proto.Vtgate.RollbackResponse;
 import com.youtube.vitess.proto.Vtgate.Session;
-
-import java.sql.SQLDataException;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * An asynchronous VTGate transaction session.

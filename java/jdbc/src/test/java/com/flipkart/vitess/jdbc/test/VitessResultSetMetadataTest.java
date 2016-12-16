@@ -1,14 +1,15 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessResultSetMetaData;
-import com.flipkart.vitess.util.Constants;
-import com.youtube.vitess.proto.Query;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.flipkart.vitess.jdbc.VitessResultSetMetaData;
+import com.flipkart.vitess.util.Constants;
+import com.youtube.vitess.proto.Query;
 
 /**
  * Created by ashudeep.sharma on 08/02/16.
@@ -20,41 +21,41 @@ public class VitessResultSetMetadataTest {
     public void initializeFieldList() {
 
         fieldList = new ArrayList<>();
-        fieldList.add(Query.Field.newBuilder().setName("col1").setType(Query.Type.INT8).build());
-        fieldList.add(Query.Field.newBuilder().setName("col2").setType(Query.Type.UINT8).build());
-        fieldList.add(Query.Field.newBuilder().setName("col3").setType(Query.Type.INT16).build());
-        fieldList.add(Query.Field.newBuilder().setName("col4").setType(Query.Type.UINT16).build());
-        fieldList.add(Query.Field.newBuilder().setName("col5").setType(Query.Type.INT24).build());
-        fieldList.add(Query.Field.newBuilder().setName("col6").setType(Query.Type.UINT24).build());
-        fieldList.add(Query.Field.newBuilder().setName("col7").setType(Query.Type.INT32).build());
-        fieldList.add(Query.Field.newBuilder().setName("col8").setType(Query.Type.UINT32).build());
-        fieldList.add(Query.Field.newBuilder().setName("col9").setType(Query.Type.INT64).build());
-        fieldList.add(Query.Field.newBuilder().setName("col10").setType(Query.Type.UINT64).build());
+        fieldList.add(Query.Field.newBuilder().setName("col1").setTable("tbl").setType(Query.Type.INT8).build());
+        fieldList.add(Query.Field.newBuilder().setName("col2").setTable("tbl").setType(Query.Type.UINT8).build());
+        fieldList.add(Query.Field.newBuilder().setName("col3").setTable("tbl").setType(Query.Type.INT16).build());
+        fieldList.add(Query.Field.newBuilder().setName("col4").setTable("tbl").setType(Query.Type.UINT16).build());
+        fieldList.add(Query.Field.newBuilder().setName("col5").setTable("tbl").setType(Query.Type.INT24).build());
+        fieldList.add(Query.Field.newBuilder().setName("col6").setTable("tbl").setType(Query.Type.UINT24).build());
+        fieldList.add(Query.Field.newBuilder().setName("col7").setTable("tbl").setType(Query.Type.INT32).build());
+        fieldList.add(Query.Field.newBuilder().setName("col8").setTable("tbl").setType(Query.Type.UINT32).build());
+        fieldList.add(Query.Field.newBuilder().setName("col9").setTable("tbl").setType(Query.Type.INT64).build());
+        fieldList.add(Query.Field.newBuilder().setName("col10").setTable("tbl").setType(Query.Type.UINT64).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col11").setType(Query.Type.FLOAT32).build());
+            .add(Query.Field.newBuilder().setName("col11").setTable("tbl").setType(Query.Type.FLOAT32).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col12").setType(Query.Type.FLOAT64).build());
+            .add(Query.Field.newBuilder().setName("col12").setTable("tbl").setType(Query.Type.FLOAT64).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col13").setType(Query.Type.TIMESTAMP).build());
-        fieldList.add(Query.Field.newBuilder().setName("col14").setType(Query.Type.DATE).build());
-        fieldList.add(Query.Field.newBuilder().setName("col15").setType(Query.Type.TIME).build());
+            .add(Query.Field.newBuilder().setName("col13").setTable("tbl").setType(Query.Type.TIMESTAMP).build());
+        fieldList.add(Query.Field.newBuilder().setName("col14").setTable("tbl").setType(Query.Type.DATE).build());
+        fieldList.add(Query.Field.newBuilder().setName("col15").setTable("tbl").setType(Query.Type.TIME).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col16").setType(Query.Type.DATETIME).build());
-        fieldList.add(Query.Field.newBuilder().setName("col17").setType(Query.Type.YEAR).build());
+            .add(Query.Field.newBuilder().setName("col16").setTable("tbl").setType(Query.Type.DATETIME).build());
+        fieldList.add(Query.Field.newBuilder().setName("col17").setTable("tbl").setType(Query.Type.YEAR).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col18").setType(Query.Type.DECIMAL).build());
-        fieldList.add(Query.Field.newBuilder().setName("col19").setType(Query.Type.TEXT).build());
-        fieldList.add(Query.Field.newBuilder().setName("col20").setType(Query.Type.BLOB).build());
+            .add(Query.Field.newBuilder().setName("col18").setTable("tbl").setType(Query.Type.DECIMAL).build());
+        fieldList.add(Query.Field.newBuilder().setName("col19").setTable("tbl").setType(Query.Type.TEXT).build());
+        fieldList.add(Query.Field.newBuilder().setName("col20").setTable("tbl").setType(Query.Type.BLOB).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col21").setType(Query.Type.VARCHAR).build());
+            .add(Query.Field.newBuilder().setName("col21").setTable("tbl").setType(Query.Type.VARCHAR).build());
         fieldList
-            .add(Query.Field.newBuilder().setName("col22").setType(Query.Type.VARBINARY).build());
-        fieldList.add(Query.Field.newBuilder().setName("col23").setType(Query.Type.CHAR).build());
-        fieldList.add(Query.Field.newBuilder().setName("col24").setType(Query.Type.BINARY).build());
-        fieldList.add(Query.Field.newBuilder().setName("col25").setType(Query.Type.BIT).build());
-        fieldList.add(Query.Field.newBuilder().setName("col26").setType(Query.Type.ENUM).build());
-        fieldList.add(Query.Field.newBuilder().setName("col27").setType(Query.Type.SET).build());
-        fieldList.add(Query.Field.newBuilder().setName("col28").setType(Query.Type.TUPLE).build());
+            .add(Query.Field.newBuilder().setName("col22").setTable("tbl").setType(Query.Type.VARBINARY).build());
+        fieldList.add(Query.Field.newBuilder().setName("col23").setTable("tbl").setType(Query.Type.CHAR).build());
+        fieldList.add(Query.Field.newBuilder().setName("col24").setTable("tbl").setType(Query.Type.BINARY).build());
+        fieldList.add(Query.Field.newBuilder().setName("col25").setTable("tbl").setType(Query.Type.BIT).build());
+        fieldList.add(Query.Field.newBuilder().setName("col26").setTable("tbl").setType(Query.Type.ENUM).build());
+        fieldList.add(Query.Field.newBuilder().setName("col27").setTable("tbl").setType(Query.Type.SET).build());
+        fieldList.add(Query.Field.newBuilder().setName("col28").setTable("tbl").setType(Query.Type.TUPLE).build());
     }
 
     public List<Query.Field> getFieldList() {
@@ -167,6 +168,14 @@ public class VitessResultSetMetadataTest {
         }
     }
 
+    @Test public void testgetTableName() throws SQLException {
+        List<Query.Field> fieldList = getFieldList();
+        VitessResultSetMetaData vitessResultSetMetadata = new VitessResultSetMetaData(fieldList);
+        for (int i = 1; i <= vitessResultSetMetadata.getColumnCount(); i++) {
+            Assert.assertEquals(vitessResultSetMetadata.getTableName(i), "tbl");
+        }
+    }
+
     @Test public void isReadOnlyTest() throws SQLException {
         List<Query.Field> fieldList = getFieldList();
         VitessResultSetMetaData vitessResultSetMetadata = new VitessResultSetMetaData(fieldList);
@@ -189,7 +198,6 @@ public class VitessResultSetMetadataTest {
         List<Query.Field> fieldList = getFieldList();
         VitessResultSetMetaData vitessResultSetMetaData = new VitessResultSetMetaData(fieldList);
         Assert.assertEquals(vitessResultSetMetaData.getSchemaName(1), null);
-        Assert.assertEquals(vitessResultSetMetaData.getTableName(1), null);
         Assert.assertEquals(vitessResultSetMetaData.getCatalogName(1), null);
         Assert.assertEquals(vitessResultSetMetaData.getSchemaName(1), null);
         Assert.assertEquals(vitessResultSetMetaData.getPrecision(1), 0);

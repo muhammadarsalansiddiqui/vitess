@@ -867,8 +867,8 @@ func (tsv *TabletServer) Execute(ctx context.Context, target *querypb.Target, sq
 				return err
 			}
 			result.Extras = extras
-			if options != nil && options.ExcludeFieldNames {
-				result = result.StripFieldNames()
+			if options != nil && (options.ExcludeFieldNames || options.ExcludeFieldMetadata) {
+				result = result.StripMetadata(options.ExcludeFieldNames, options.ExcludeFieldMetadata)
 			}
 			return nil
 		},
@@ -945,10 +945,16 @@ func (tsv *TabletServer) StreamExecute(ctx context.Context, target *querypb.Targ
 				te:       tsv.te,
 			}
 			excludeFieldNames := false
-			if options != nil && options.ExcludeFieldNames {
-				excludeFieldNames = true
+			excludeFieldMetadata := false
+			if options != nil {
+				if options.ExcludeFieldNames {
+					excludeFieldNames = true
+				}
+				if options.ExcludeFieldMetadata {
+					excludeFieldMetadata = true
+				}
 			}
-			return qre.Stream(excludeFieldNames, sendReply)
+			return qre.Stream(excludeFieldNames, excludeFieldMetadata, sendReply)
 		},
 	)
 	return err

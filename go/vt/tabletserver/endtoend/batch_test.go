@@ -27,15 +27,19 @@ func TestBatchRead(t *testing.T) {
 		Fields: []*querypb.Field{{
 			Name: "eid",
 			Type: sqltypes.Int64,
+			Table: "vitess_a",
 		}, {
 			Name: "id",
 			Type: sqltypes.Int32,
+			Table: "vitess_a",
 		}, {
 			Name: "name",
 			Type: sqltypes.VarChar,
+			Table: "vitess_a",
 		}, {
 			Name: "foo",
 			Type: sqltypes.VarBinary,
+			Table: "vitess_a",
 		}},
 		RowsAffected: 1,
 		Rows: [][]sqltypes.Value{
@@ -51,9 +55,11 @@ func TestBatchRead(t *testing.T) {
 		Fields: []*querypb.Field{{
 			Name: "eid",
 			Type: sqltypes.Int64,
+			Table: "vitess_b",
 		}, {
 			Name: "id",
 			Type: sqltypes.Int32,
+			Table: "vitess_b",
 		}},
 		RowsAffected: 1,
 		Rows: [][]sqltypes.Value{

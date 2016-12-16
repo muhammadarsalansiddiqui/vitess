@@ -36,6 +36,7 @@ var hcVTGateTest *discovery.FakeHealthCheck
 
 var executeOptions = &querypb.ExecuteOptions{
 	ExcludeFieldNames: true,
+	ExcludeFieldMetadata: true,
 }
 
 func init() {

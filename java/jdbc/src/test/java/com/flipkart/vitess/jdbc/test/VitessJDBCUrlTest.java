@@ -1,11 +1,12 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessJDBCUrl;
-import com.youtube.vitess.proto.Topodata;
+import java.util.Properties;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Properties;
+import com.flipkart.vitess.jdbc.VitessJDBCUrl;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by naveen.nahata on 18/02/16.
@@ -159,7 +160,18 @@ public class VitessJDBCUrlTest {
 
         vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991", null);
         Assert.assertFalse(vitessJDBCUrl.isTwopcEnabled());
+    }
 
+    @Test public void testExcludeFieldMetadataURL() throws Exception {
+        VitessJDBCUrl vitessJDBCUrl =
+            new VitessJDBCUrl("jdbc:vitess://host:15991?excludeFieldMetadata=true", null);
+        Assert.assertTrue(vitessJDBCUrl.isExcludeFieldMetadata());
+
+        vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991?excludeFieldMetadata=false", null);
+        Assert.assertFalse(vitessJDBCUrl.isExcludeFieldMetadata());
+
+        vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991", null);
+        Assert.assertFalse(vitessJDBCUrl.isExcludeFieldMetadata());
     }
 
 }

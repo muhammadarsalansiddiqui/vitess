@@ -99,6 +99,7 @@ public class Constants {
         public static final String USERNAME = "userName";
         public static final String EXECUTE_TYPE = "executeType";
         public static final String TWOPC_ENABLED = "twopcEnabled";
+        public static final String EXCLUDE_FIELD_METADATA = "excludeFieldMetadata";
     }
 
 

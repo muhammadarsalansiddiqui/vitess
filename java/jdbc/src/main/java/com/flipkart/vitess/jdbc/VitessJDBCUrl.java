@@ -1,9 +1,5 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.Constants;
-import com.flipkart.vitess.util.StringUtils;
-import com.youtube.vitess.proto.Topodata;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.SQLException;
@@ -13,6 +9,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.StringUtils;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by naveen.nahata on 17/02/16.
@@ -27,6 +27,7 @@ public class VitessJDBCUrl {
     private String catalog;
     private final String executeType;
     private final boolean twopcEnabled;
+    private final boolean excludeFieldMetadata;
 
 
     /*
@@ -108,6 +109,8 @@ public class VitessJDBCUrl {
         this.url = url;
         this.twopcEnabled =
             "true".equalsIgnoreCase(info.getProperty(Constants.Property.TWOPC_ENABLED));
+        this.excludeFieldMetadata =
+            "true".equalsIgnoreCase(info.getProperty(Constants.Property.EXCLUDE_FIELD_METADATA));
     }
 
     public String getUsername() {
@@ -252,5 +255,9 @@ public class VitessJDBCUrl {
 
     public boolean isTwopcEnabled() {
         return twopcEnabled;
+    }
+
+    public boolean isExcludeFieldMetadata() {
+        return excludeFieldMetadata;
     }
 }

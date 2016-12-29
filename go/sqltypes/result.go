@@ -118,6 +118,7 @@ func (result *Result) StripMetadata(stripFieldName bool, stripFieldMetadata bool
 		r.Fields[i] = &newFieldsArray[i]
 		newFieldsArray[i].Type = f.Type
 		if !stripFieldName && !stripFieldMetadata {
+			newFieldsArray[i].MysqlType = f.MysqlType
 			newFieldsArray[i].Name = f.Name
 			newFieldsArray[i].Table = f.Table
 			newFieldsArray[i].Schema = f.Schema

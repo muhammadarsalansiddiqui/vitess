@@ -145,6 +145,7 @@ func TestStripMetaData(t *testing.T) {
 		in: &Result{
 			Fields: []*querypb.Field{{
 				Name: "field1",
+				MysqlType: 252,
 				Table: "table1",
 				Schema: "schema1",
 				OrgTable: "orgtable1",
@@ -156,6 +157,7 @@ func TestStripMetaData(t *testing.T) {
 				Type: Int64,
 			}, {
 				Name: "field2",
+				MysqlType: 252,
 				Table: "table2",
 				Schema: "schema2",
 				OrgTable: "orgtable2",

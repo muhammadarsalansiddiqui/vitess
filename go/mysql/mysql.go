@@ -272,12 +272,14 @@ func (conn *Connection) Fields() (fields []*querypb.Field, err error) {
 	for i := 0; i < nfields; i++ {
 		fvals[i].Name = copy_string(cfields[i].name_length, cfields[i].name)
 		fvals[i].Type, err = sqltypes.MySQLToType(int64(cfields[i]._type), int64(cfields[i].flags))
+		fvals[i].MysqlType = uint32(cfields[i]._type)
 		fvals[i].Table = copy_string(cfields[i].table_length, cfields[i].table)
 		fvals[i].Schema = copy_string(cfields[i].schema_length, cfields[i].schema)
 		fvals[i].OrgTable = copy_string(cfields[i].org_table_length, cfields[i].org_table)
+		fvals[i].Database = copy_string(cfields[i].db_length, cfields[i].db)
 		fvals[i].OrgName = copy_string(cfields[i].org_name_length, cfields[i].org_name)
 		fvals[i].ColumnLength = uint32(cfields[i].length)
-		fvals[i].Charset = uint64(cfields[i].charsetnr)
+		fvals[i].Charset = uint32(cfields[i].charsetnr)
 		fvals[i].Decimals = uint32(cfields[i].decimals)
 		fvals[i].Flags = uint32(cfields[i].flags)
 

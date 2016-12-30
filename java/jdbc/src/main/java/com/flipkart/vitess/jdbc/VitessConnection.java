@@ -19,6 +19,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
+import com.flipkart.vitess.util.CharsetMapping;
 import com.flipkart.vitess.util.CommonUtils;
 import com.flipkart.vitess.util.Constants;
 import com.flipkart.vitess.util.MysqlDefs;
@@ -38,13 +40,18 @@ import com.youtube.vitess.proto.Topodata;
 /**
  * Created by harshit.gangal on 23/01/16.
  */
-public class VitessConnection implements Connection {
+public class VitessConnection extends ConnectionProperties implements Connection {
 
+    public Map<Integer, String> indexToMysqlCharset = new HashMap<>();
+
+    private static final Map<String, Map<Integer, String>> dynamicIndexToCharsetMapByUrl = new HashMap<>();
     private static final int DEFAULT_RESULT_SET_TYPE = ResultSet.TYPE_FORWARD_ONLY;
     private static final int DEFAULT_RESULT_SET_CONCURRENCY = ResultSet.CONCUR_READ_ONLY;
+
     /* Get actual class name to be printed on */
     private static Logger logger = Logger.getLogger(VitessConnection.class.getName());
     private static DatabaseMetaData databaseMetaData = null;
+
     /**
      * A Map of currently open statements
      */
@@ -55,20 +62,20 @@ public class VitessConnection implements Connection {
     private boolean autoCommit = true;
     private boolean readOnly = false;
     private DBProperties dbProperties;
-    private VitessJDBCUrl vitessJDBCUrl;
-
+    private final VitessJDBCUrl vitessJDBCUrl;
 
     /**
      * Constructor to Create Connection Object
      *
      * @param url  - Connection url
-     * @param info - property for the connection
+     * @param connectionProperties - property for the connection
      * @throws SQLException
      */
-    public VitessConnection(String url, Properties info) throws SQLException {
+    public VitessConnection(String url, Properties connectionProperties) throws SQLException {
+        initializeProperties(connectionProperties);
 
         try {
-            this.vitessJDBCUrl = new VitessJDBCUrl(url, info);
+            this.vitessJDBCUrl = new VitessJDBCUrl(url, connectionProperties);
             this.vTGateConnections = new VitessVTGateManager.VTGateConnections(vitessJDBCUrl);
             this.closed = false;
             this.dbProperties = null;
@@ -76,6 +83,8 @@ public class VitessConnection implements Connection {
             throw new SQLException(
                 Constants.SQLExceptionMessages.CONN_INIT_ERROR + " - " + e.getMessage(), e);
         }
+
+        buildCollationMapping();
     }
 
     /**
@@ -848,5 +857,85 @@ public class VitessConnection implements Connection {
 
     public String getUsername() {
         return this.vitessJDBCUrl.getUsername();
+    }
+
+    public String getEncodingForIndex(int charsetIndex) throws SQLException {
+        String javaEncoding = null;
+
+        if (charsetIndex != MysqlDefs.NO_CHARSET_INFO) {
+            try {
+                if (this.indexToMysqlCharset.size() > 0) {
+                    javaEncoding = CharsetMapping.getJavaEncodingForMysqlCharset(this.indexToMysqlCharset.get(charsetIndex), getCharacterEncoding());
+                }
+                // checking against static maps if no custom charset found
+                if (javaEncoding == null) {
+                    javaEncoding = CharsetMapping.getJavaEncodingForCollationIndex(charsetIndex, getCharacterEncoding());
+                }
+            } catch (ArrayIndexOutOfBoundsException outOfBoundsEx) {
+                throw new SQLException("Unknown character set index for field '" + charsetIndex + "' received from server.");
+            } catch (RuntimeException ex) {
+                SQLException sqlEx = new SQLException(ex.toString(), Constants.SQLExceptionMessages.ILLEGAL_VALUE_FOR);
+                sqlEx.initCause(ex);
+                throw sqlEx;
+            }
+
+            // Punt
+            if (javaEncoding == null) {
+                javaEncoding = getCharacterEncoding();
+            }
+        } else {
+            javaEncoding = getCharacterEncoding();
+        }
+
+        return javaEncoding;
+    }
+
+    public int getMaxBytesPerChar(Integer charsetIndex, String javaCharsetName) {
+
+        String charset;
+        int res;
+
+        // if we can get it by charsetIndex just doing it
+        charset = CharsetMapping.getMysqlCharsetNameForCollationIndex(charsetIndex);
+
+        // if we didn't find charset name by index
+        if (charset == null) {
+            charset = CharsetMapping.getMysqlCharsetForJavaEncoding(javaCharsetName);
+        }
+
+        // checking against static maps
+        res = CharsetMapping.getMblen(charset);
+
+        return res;
+    }
+
+    /**
+     * Builds the map needed for 4.1.0 and newer servers that maps field-level
+     * charset/collation info to a java character encoding name.
+     *
+     * @throws SQLException
+     */
+    private void buildCollationMapping() throws SQLException {
+        Map<Integer, String> indexToCharset = null;
+        if (getCacheServerConfiguration()) {
+            synchronized (dynamicIndexToCharsetMapByUrl) {
+                indexToCharset = dynamicIndexToCharsetMapByUrl.get(getUrl());
+            }
+        }
+
+        if (indexToCharset == null) {
+            indexToCharset = new HashMap<>();
+
+            for (int i = 1; i < CharsetMapping.MAP_SIZE; i++) {
+                indexToCharset.put(i, CharsetMapping.getMysqlCharsetNameForCollationIndex(i));
+            }
+            if (getCacheServerConfiguration()) {
+                synchronized (dynamicIndexToCharsetMapByUrl) {
+                    dynamicIndexToCharsetMapByUrl.put(getUrl(), indexToCharset);
+                }
+            }
+        }
+
+        this.indexToMysqlCharset = Collections.unmodifiableMap(indexToCharset);
     }
 }

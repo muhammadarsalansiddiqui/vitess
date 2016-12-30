@@ -100,6 +100,27 @@ public class Constants {
         public static final String EXECUTE_TYPE = "executeType";
         public static final String TWOPC_ENABLED = "twopcEnabled";
         public static final String EXCLUDE_FIELD_METADATA = "excludeFieldMetadata";
+
+        public static final String BLOBS_ARE_STRINGS = "blobsAreStrings";
+        public static final boolean BLOBS_ARE_STRINGS_DEFAULT = false;
+        public static final String USE_BLOB_TO_STORE_UTF8_OUTSIDE_BMP = "useBlobToStoreUTF8OutsideBMP";
+        public static final boolean USE_BLOB_TO_STORE_UTF8_OUTSIDE_BMP_DEFAULT = false;
+        public static final String TINY_INT_1_IS_BIT = "tinyInt1isBit";
+        public static final boolean TINY_INT_1_IS_BIT_DEFAULT = true;
+        public static final String TRANSFORMED_BIT_IS_BOOLEAN = "transformedBitIsBoolean";
+        public static final boolean TRANSFORMED_BIT_IS_BOOLEAN_DEFAULT = false;
+        public static final String FUNCTIONS_NEVER_RETURN_BLOBS = "functionsNeverReturnBlobs";
+        public static final boolean FUNCTIONS_NEVER_RETURN_BLOBS_DEFAULT = false;
+        public static final String UTF8_OUTSIDE_BMP_INCLUDED_COLUMN_NAME_PATTERN = "utf8OutsideBmpIncludedColumnNamePattern";
+        public static final String UTF8_OUTSIDE_BMP_INCLUDED_COLUMN_NAME_PATTERN_DEFAULT = null;
+        public static final String UTF8_OUTSIDE_BMP_EXCLUDED_COLUMN_NAME_PATTERN = "utf8OutsideBmpExcludedColumnNamePattern";
+        public static final String UTF8_OUTSIDE_BMP_EXCLUDED_COLUMN_NAME_PATTERN_DEFAULT = null;
+        public static final String PARANOID = "paranoid";
+        public static final boolean PARANOID_DEFAULT = false;
+        public static final String USE_OLD_UTF8_BEHAVIOR = "useOldUTF8Behavior";
+        public static final boolean USE_OLD_UTF8_BEHAVIOR_DEFAULT = false;
+        public static final String CHARACTER_ENCODING = "characterEncoding";
+        public static final String CHARACTER_ENCODING_DEFAULT = null;
     }
 
 

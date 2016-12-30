@@ -29,6 +29,7 @@ public class VitessDriver implements Driver {
         }
     }
 
+    @Override
     public Connection connect(String url, Properties info) throws SQLException {
         return acceptsURL(url) ? new VitessConnection(url, info) : null;
     }
@@ -44,6 +45,7 @@ public class VitessDriver implements Driver {
      * <p/>
      * TODO: Write a better regex
      */
+    @Override
     public boolean acceptsURL(String url) throws SQLException {
         return null != url && url.startsWith(Constants.URL_PREFIX);
     }
@@ -54,6 +56,7 @@ public class VitessDriver implements Driver {
      * @return DriverPropertyInfo Array Object
      * @throws SQLException
      */
+    @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         if (null == info) {
             info = new Properties();
@@ -103,18 +106,22 @@ public class VitessDriver implements Driver {
         return dpi;
     }
 
+    @Override
     public int getMajorVersion() {
         return Constants.DRIVER_MAJOR_VERSION;
     }
 
+    @Override
     public int getMinorVersion() {
         return Constants.DRIVER_MINOR_VERSION;
     }
 
+    @Override
     public boolean jdbcCompliant() {
         return Constants.JDBC_COMPLIANT;
     }
 
+    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         throw new SQLFeatureNotSupportedException(
             Constants.SQLExceptionMessages.SQL_FEATURE_NOT_SUPPORTED);

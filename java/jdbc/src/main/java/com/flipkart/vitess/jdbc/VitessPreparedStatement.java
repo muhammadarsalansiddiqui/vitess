@@ -1,14 +1,5 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.Constants;
-import com.flipkart.vitess.util.StringUtils;
-import com.youtube.vitess.client.Context;
-import com.youtube.vitess.client.VTGateConn;
-import com.youtube.vitess.client.VTGateTx;
-import com.youtube.vitess.client.cursor.Cursor;
-import com.youtube.vitess.mysql.DateTime;
-import com.youtube.vitess.proto.Topodata;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -43,6 +34,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.StringUtils;
+import com.youtube.vitess.client.Context;
+import com.youtube.vitess.client.VTGateConn;
+import com.youtube.vitess.client.VTGateTx;
+import com.youtube.vitess.client.cursor.Cursor;
+import com.youtube.vitess.mysql.DateTime;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by harshit.gangal on 25/01/16.
@@ -142,7 +142,7 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                 throw new SQLException(Constants.SQLExceptionMessages.METHOD_CALL_FAILED);
             }
 
-            this.vitessResultSet = new VitessResultSet(cursor, this);
+            this.vitessResultSet = new VitessResultSet(getVitessConnection(), cursor, this);
         } catch (SQLRecoverableException ex) {
             this.vitessConnection.setVtGateTx(null);
             throw ex;
@@ -229,7 +229,7 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
         if (showSql) {
             cursor = this.executeShow(this.sql);
             if (!(null == cursor || null == cursor.getFields() || cursor.getFields().isEmpty())) {
-                this.vitessResultSet = new VitessResultSet(cursor, this);
+                this.vitessResultSet = new VitessResultSet(getVitessConnection(), cursor, this);
                 return true;
             }
             throw new SQLException(Constants.SQLExceptionMessages.METHOD_CALL_FAILED);

@@ -1,22 +1,37 @@
 package com.flipkart.vitess.jdbc;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import com.flipkart.vitess.util.Constants;
 import com.google.protobuf.ByteString;
 import com.youtube.vitess.client.cursor.Cursor;
 import com.youtube.vitess.client.cursor.Row;
 import com.youtube.vitess.client.cursor.SimpleCursor;
 import com.youtube.vitess.proto.Query;
-
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 
 /**
@@ -26,6 +41,7 @@ public class VitessResultSet implements ResultSet {
 
     /* Get actual class name to be printed on */
     private static Logger logger = Logger.getLogger(VitessResultSet.class.getName());
+    private final VitessConnection connection;
 
     private Cursor cursor;
     private List<Query.Field> fields;
@@ -40,11 +56,12 @@ public class VitessResultSet implements ResultSet {
      */
     private int lastIndexRead = -1;
 
-    public VitessResultSet(Cursor cursor) throws SQLException {
-        this(cursor, null);
+    public VitessResultSet(VitessConnection connection, Cursor cursor) throws SQLException {
+        this(connection, cursor, null);
     }
 
-    public VitessResultSet(Cursor cursor, VitessStatement vitessStatement) throws SQLException {
+    public VitessResultSet(VitessConnection connection, Cursor cursor, VitessStatement vitessStatement) throws SQLException {
+        this.connection = connection;
         if (null == cursor) {
             throw new SQLException(Constants.SQLExceptionMessages.CURSOR_NULL);
         }
@@ -63,8 +80,9 @@ public class VitessResultSet implements ResultSet {
         }
     }
 
-    public VitessResultSet(String[] columnNames, Query.Type[] columnTypes, String[][] data)
+    public VitessResultSet(VitessConnection connection, String[] columnNames, Query.Type[] columnTypes, String[][] data)
         throws SQLException {
+        this.connection = connection;
 
         if (columnNames.length != columnTypes.length) {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_RESULT_SET);
@@ -100,8 +118,9 @@ public class VitessResultSet implements ResultSet {
         this.currentRow = 0;
     }
 
-    public VitessResultSet(String[] columnNames, Query.Type[] columnTypes,
+    public VitessResultSet(VitessConnection connection, String[] columnNames, Query.Type[] columnTypes,
         ArrayList<ArrayList<String>> data) throws SQLException {
+        this.connection = connection;
 
         if (columnNames.length != columnTypes.length) {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_RESULT_SET);
@@ -509,7 +528,7 @@ public class VitessResultSet implements ResultSet {
     }
 
     public ResultSetMetaData getMetaData() throws SQLException {
-        return new VitessResultSetMetaData(cursor.getFields());
+        return new VitessResultSetMetaData(connection, cursor.getFields());
     }
 
     public Object getObject(int columnIndex) throws SQLException {

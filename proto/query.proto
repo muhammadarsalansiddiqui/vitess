@@ -47,6 +47,32 @@ message EventToken {
   string position = 3;
 }
 
+// Flags sent from the MySQL C API
+enum MySqlFlag {
+  EMPTY = 0;
+  NOT_NULL_FLAG = 1;
+  PRI_KEY_FLAG = 2;
+  UNIQUE_KEY_FLAG = 4;
+  MULTIPLE_KEY_FLAG = 8;
+  BLOB_FLAG = 16;
+  UNSIGNED_FLAG = 32;
+  ZEROFILL_FLAG = 64;
+  BINARY_FLAG = 128;
+  ENUM_FLAG = 256;
+  AUTO_INCREMENT_FLAG = 512;
+  TIMESTAMP_FLAG = 1024;
+  SET_FLAG = 2048;
+  NO_DEFAULT_VALUE_FLAG = 4096;
+  ON_UPDATE_NOW_FLAG = 8192;
+  NUM_FLAG = 32768;
+  PART_KEY_FLAG = 16384;
+  GROUP_FLAG = 32768;
+  UNIQUE_FLAG = 65536;
+  BINCMP_FLAG = 131072;
+
+  option allow_alias = true;
+}
+
 // Flag allows us to qualify types by their common properties.
 enum Flag {
   NONE = 0;
@@ -182,9 +208,7 @@ message BoundQuery {
 
 // ExecuteOptions is passed around for all Execute calls.
 message ExecuteOptions {
-  // If set, the resulting Field array won’t have a Name, just a Type.
-  // This is an optimization for high-QPS queries where the client knows
-  // what it's getting.
+  // Deprecated, see exclude_field_metadata instead
   bool exclude_field_names = 1;
 
   // If set, we will try to include an EventToken with the responses.
@@ -194,6 +218,11 @@ message ExecuteOptions {
   // This is a shortcut so the application doesn't need to care about
   // comparing EventTokens.
   EventToken compare_event_token = 3;
+
+  // If set, the resulting Field array won't have metadata such as
+  // field name, table name, etc. This is an optimization for high-QPS queries where
+  // the client knows what it's getting
+  bool exclude_field_metadata = 4;
 }
 
 // Field describes a single column returned by a query
@@ -203,6 +232,15 @@ message Field {
 
   // vitess-defined type. Conversion function is in sqltypes package.
   Type type = 2;
+  string table = 3;
+  string schema = 4;
+  string org_table = 5;
+  string database = 6;
+  string org_name = 7;
+  uint64 column_length = 8;
+  uint32 charset = 9;
+  uint32 decimals = 10;
+  uint32 flags = 11;
 }
 
 // Row is a database row.

@@ -22,11 +22,106 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='query.proto',
   package='query',
   syntax='proto3',
-  serialized_pb=_b('\n\x0bquery.proto\x12\x05query\x1a\x0etopodata.proto\x1a\x0bvtrpc.proto\"T\n\x06Target\x12\x10\n\x08keyspace\x18\x01 \x01(\t\x12\r\n\x05shard\x18\x02 \x01(\t\x12)\n\x0btablet_type\x18\x03 \x01(\x0e\x32\x14.topodata.TabletType\"\"\n\x0eVTGateCallerID\x12\x10\n\x08username\x18\x01 \x01(\t\"@\n\nEventToken\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\r\n\x05shard\x18\x02 \x01(\t\x12\x10\n\x08position\x18\x03 \x01(\t\"1\n\x05Value\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.query.Type\x12\r\n\x05value\x18\x02 \x01(\x0c\"V\n\x0c\x42indVariable\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.query.Type\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x1c\n\x06values\x18\x03 \x03(\x0b\x32\x0c.query.Value\"\xa2\x01\n\nBoundQuery\x12\x0b\n\x03sql\x18\x01 \x01(\t\x12<\n\x0e\x62ind_variables\x18\x02 \x03(\x0b\x32$.query.BoundQuery.BindVariablesEntry\x1aI\n\x12\x42indVariablesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.query.BindVariable:\x02\x38\x01\"z\n\x0e\x45xecuteOptions\x12\x1b\n\x13\x65xclude_field_names\x18\x01 \x01(\x08\x12\x1b\n\x13include_event_token\x18\x02 \x01(\x08\x12.\n\x13\x63ompare_event_token\x18\x03 \x01(\x0b\x32\x11.query.EventToken\"0\n\x05\x46ield\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x19\n\x04type\x18\x02 \x01(\x0e\x32\x0b.query.Type\"&\n\x03Row\x12\x0f\n\x07lengths\x18\x01 \x03(\x12\x12\x0e\n\x06values\x18\x02 \x01(\x0c\"G\n\x0cResultExtras\x12&\n\x0b\x65vent_token\x18\x01 \x01(\x0b\x32\x11.query.EventToken\x12\x0f\n\x07\x66resher\x18\x02 \x01(\x08\"\x94\x01\n\x0bQueryResult\x12\x1c\n\x06\x66ields\x18\x01 \x03(\x0b\x32\x0c.query.Field\x12\x15\n\rrows_affected\x18\x02 \x01(\x04\x12\x11\n\tinsert_id\x18\x03 \x01(\x04\x12\x18\n\x04rows\x18\x04 \x03(\x0b\x32\n.query.Row\x12#\n\x06\x65xtras\x18\x05 \x01(\x0b\x32\x13.query.ResultExtras\"\xca\x02\n\x0bStreamEvent\x12\x30\n\nstatements\x18\x01 \x03(\x0b\x32\x1c.query.StreamEvent.Statement\x12&\n\x0b\x65vent_token\x18\x02 \x01(\x0b\x32\x11.query.EventToken\x1a\xe0\x01\n\tStatement\x12\x37\n\x08\x63\x61tegory\x18\x01 \x01(\x0e\x32%.query.StreamEvent.Statement.Category\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12(\n\x12primary_key_fields\x18\x03 \x03(\x0b\x32\x0c.query.Field\x12&\n\x12primary_key_values\x18\x04 \x03(\x0b\x32\n.query.Row\x12\x0b\n\x03sql\x18\x05 \x01(\x0c\"\'\n\x08\x43\x61tegory\x12\t\n\x05\x45rror\x10\x00\x12\x07\n\x03\x44ML\x10\x01\x12\x07\n\x03\x44\x44L\x10\x02\"\xf3\x01\n\x0e\x45xecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0etransaction_id\x18\x05 \x01(\x03\x12&\n\x07options\x18\x06 \x01(\x0b\x32\x15.query.ExecuteOptions\"5\n\x0f\x45xecuteResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.query.QueryResult\"U\n\x0fResultWithError\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12\"\n\x06result\x18\x02 \x01(\x0b\x32\x12.query.QueryResult\"\x92\x02\n\x13\x45xecuteBatchRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\"\n\x07queries\x18\x04 \x03(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0e\x61s_transaction\x18\x05 \x01(\x08\x12\x16\n\x0etransaction_id\x18\x06 \x01(\x03\x12&\n\x07options\x18\x07 \x01(\x0b\x32\x15.query.ExecuteOptions\";\n\x14\x45xecuteBatchResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.query.QueryResult\"\xe1\x01\n\x14StreamExecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12&\n\x07options\x18\x05 \x01(\x0b\x32\x15.query.ExecuteOptions\";\n\x15StreamExecuteResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.query.QueryResult\"\x8f\x01\n\x0c\x42\x65ginRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\"\'\n\rBeginResponse\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x03\"\xa8\x01\n\rCommitRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\"\x10\n\x0e\x43ommitResponse\"\xaa\x01\n\x0fRollbackRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\"\x12\n\x10RollbackResponse\"\xb7\x01\n\x0ePrepareRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x11\n\x0fPrepareResponse\"\xa6\x01\n\x15\x43ommitPreparedRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"\x18\n\x16\x43ommitPreparedResponse\"\xc0\x01\n\x17RollbackPreparedRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x1a\n\x18RollbackPreparedResponse\"\xce\x01\n\x18\x43reateTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\x12#\n\x0cparticipants\x18\x05 \x03(\x0b\x32\r.query.Target\"\x1b\n\x19\x43reateTransactionResponse\"\xbb\x01\n\x12StartCommitRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x15\n\x13StartCommitResponse\"\xbb\x01\n\x12SetRollbackRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x15\n\x13SetRollbackResponse\"\xab\x01\n\x1a\x43oncludeTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"\x1d\n\x1b\x43oncludeTransactionResponse\"\xa7\x01\n\x16ReadTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"G\n\x17ReadTransactionResponse\x12,\n\x08metadata\x18\x01 \x01(\x0b\x32\x1a.query.TransactionMetadata\"\xe0\x01\n\x13\x42\x65ginExecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12&\n\x07options\x18\x05 \x01(\x0b\x32\x15.query.ExecuteOptions\"r\n\x14\x42\x65ginExecuteResponse\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12\"\n\x06result\x18\x02 \x01(\x0b\x32\x12.query.QueryResult\x12\x16\n\x0etransaction_id\x18\x03 \x01(\x03\"\xff\x01\n\x18\x42\x65ginExecuteBatchRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\"\n\x07queries\x18\x04 \x03(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0e\x61s_transaction\x18\x05 \x01(\x08\x12&\n\x07options\x18\x06 \x01(\x0b\x32\x15.query.ExecuteOptions\"x\n\x19\x42\x65ginExecuteBatchResponse\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12#\n\x07results\x18\x02 \x03(\x0b\x32\x12.query.QueryResult\x12\x16\n\x0etransaction_id\x18\x03 \x01(\x03\"\xe7\x02\n\x11SplitQueryRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12\x14\n\x0csplit_column\x18\x05 \x03(\t\x12\x13\n\x0bsplit_count\x18\x06 \x01(\x03\x12\x1f\n\x17num_rows_per_query_part\x18\x08 \x01(\x03\x12\x35\n\talgorithm\x18\t \x01(\x0e\x32\".query.SplitQueryRequest.Algorithm\",\n\tAlgorithm\x12\x10\n\x0c\x45QUAL_SPLITS\x10\x00\x12\r\n\tFULL_SCAN\x10\x01\"A\n\nQuerySplit\x12 \n\x05query\x18\x01 \x01(\x0b\x32\x11.query.BoundQuery\x12\x11\n\trow_count\x18\x02 \x01(\x03\"8\n\x12SplitQueryResponse\x12\"\n\x07queries\x18\x01 \x03(\x0b\x32\x11.query.QuerySplit\"\x15\n\x13StreamHealthRequest\"\xb6\x01\n\rRealtimeStats\x12\x14\n\x0chealth_error\x18\x01 \x01(\t\x12\x1d\n\x15seconds_behind_master\x18\x02 \x01(\r\x12\x1c\n\x14\x62inlog_players_count\x18\x03 \x01(\x05\x12\x32\n*seconds_behind_master_filtered_replication\x18\x04 \x01(\x03\x12\x11\n\tcpu_usage\x18\x05 \x01(\x01\x12\x0b\n\x03qps\x18\x06 \x01(\x01\"\xa4\x01\n\x14StreamHealthResponse\x12\x1d\n\x06target\x18\x01 \x01(\x0b\x32\r.query.Target\x12\x0f\n\x07serving\x18\x02 \x01(\x08\x12.\n&tablet_externally_reparented_timestamp\x18\x03 \x01(\x03\x12,\n\x0erealtime_stats\x18\x04 \x01(\x0b\x32\x14.query.RealtimeStats\"\xbb\x01\n\x13UpdateStreamRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x10\n\x08position\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\"9\n\x14UpdateStreamResponse\x12!\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x12.query.StreamEvent\"\x86\x01\n\x13TransactionMetadata\x12\x0c\n\x04\x64tid\x18\x01 \x01(\t\x12&\n\x05state\x18\x02 \x01(\x0e\x32\x17.query.TransactionState\x12\x14\n\x0ctime_created\x18\x03 \x01(\x03\x12#\n\x0cparticipants\x18\x04 \x03(\x0b\x32\r.query.Target*k\n\x04\x46lag\x12\x08\n\x04NONE\x10\x00\x12\x0f\n\nISINTEGRAL\x10\x80\x02\x12\x0f\n\nISUNSIGNED\x10\x80\x04\x12\x0c\n\x07ISFLOAT\x10\x80\x08\x12\r\n\x08ISQUOTED\x10\x80\x10\x12\x0b\n\x06ISTEXT\x10\x80 \x12\r\n\x08ISBINARY\x10\x80@*\x89\x03\n\x04Type\x12\r\n\tNULL_TYPE\x10\x00\x12\t\n\x04INT8\x10\x81\x02\x12\n\n\x05UINT8\x10\x82\x06\x12\n\n\x05INT16\x10\x83\x02\x12\x0b\n\x06UINT16\x10\x84\x06\x12\n\n\x05INT24\x10\x85\x02\x12\x0b\n\x06UINT24\x10\x86\x06\x12\n\n\x05INT32\x10\x87\x02\x12\x0b\n\x06UINT32\x10\x88\x06\x12\n\n\x05INT64\x10\x89\x02\x12\x0b\n\x06UINT64\x10\x8a\x06\x12\x0c\n\x07\x46LOAT32\x10\x8b\x08\x12\x0c\n\x07\x46LOAT64\x10\x8c\x08\x12\x0e\n\tTIMESTAMP\x10\x8d\x10\x12\t\n\x04\x44\x41TE\x10\x8e\x10\x12\t\n\x04TIME\x10\x8f\x10\x12\r\n\x08\x44\x41TETIME\x10\x90\x10\x12\t\n\x04YEAR\x10\x91\x06\x12\x0b\n\x07\x44\x45\x43IMAL\x10\x12\x12\t\n\x04TEXT\x10\x93\x30\x12\t\n\x04\x42LOB\x10\x94P\x12\x0c\n\x07VARCHAR\x10\x95\x30\x12\x0e\n\tVARBINARY\x10\x96P\x12\t\n\x04\x43HAR\x10\x97\x30\x12\x0b\n\x06\x42INARY\x10\x98P\x12\x08\n\x03\x42IT\x10\x99\x10\x12\t\n\x04\x45NUM\x10\x9a\x10\x12\x08\n\x03SET\x10\x9b\x10\x12\t\n\x05TUPLE\x10\x1c\x12\r\n\x08GEOMETRY\x10\x9d\x10\x12\t\n\x04JSON\x10\x9e\x10*F\n\x10TransactionState\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07PREPARE\x10\x01\x12\n\n\x06\x43OMMIT\x10\x02\x12\x0c\n\x08ROLLBACK\x10\x03\x42\x1a\n\x18\x63om.youtube.vitess.protob\x06proto3')
+  serialized_pb=_b('\n\x0bquery.proto\x12\x05query\x1a\x0etopodata.proto\x1a\x0bvtrpc.proto\"T\n\x06Target\x12\x10\n\x08keyspace\x18\x01 \x01(\t\x12\r\n\x05shard\x18\x02 \x01(\t\x12)\n\x0btablet_type\x18\x03 \x01(\x0e\x32\x14.topodata.TabletType\"\"\n\x0eVTGateCallerID\x12\x10\n\x08username\x18\x01 \x01(\t\"@\n\nEventToken\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\r\n\x05shard\x18\x02 \x01(\t\x12\x10\n\x08position\x18\x03 \x01(\t\"1\n\x05Value\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.query.Type\x12\r\n\x05value\x18\x02 \x01(\x0c\"V\n\x0c\x42indVariable\x12\x19\n\x04type\x18\x01 \x01(\x0e\x32\x0b.query.Type\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x1c\n\x06values\x18\x03 \x03(\x0b\x32\x0c.query.Value\"\xa2\x01\n\nBoundQuery\x12\x0b\n\x03sql\x18\x01 \x01(\t\x12<\n\x0e\x62ind_variables\x18\x02 \x03(\x0b\x32$.query.BoundQuery.BindVariablesEntry\x1aI\n\x12\x42indVariablesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.query.BindVariable:\x02\x38\x01\"\x9a\x01\n\x0e\x45xecuteOptions\x12\x1b\n\x13\x65xclude_field_names\x18\x01 \x01(\x08\x12\x1b\n\x13include_event_token\x18\x02 \x01(\x08\x12.\n\x13\x63ompare_event_token\x18\x03 \x01(\x0b\x32\x11.query.EventToken\x12\x1e\n\x16\x65xclude_field_metadata\x18\x04 \x01(\x08\"\xcf\x01\n\x05\x46ield\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x19\n\x04type\x18\x02 \x01(\x0e\x32\x0b.query.Type\x12\r\n\x05table\x18\x03 \x01(\t\x12\x0e\n\x06schema\x18\x04 \x01(\t\x12\x11\n\torg_table\x18\x05 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x06 \x01(\t\x12\x10\n\x08org_name\x18\x07 \x01(\t\x12\x15\n\rcolumn_length\x18\x08 \x01(\x04\x12\x0f\n\x07\x63harset\x18\t \x01(\r\x12\x10\n\x08\x64\x65\x63imals\x18\n \x01(\r\x12\r\n\x05\x66lags\x18\x0b \x01(\r\"&\n\x03Row\x12\x0f\n\x07lengths\x18\x01 \x03(\x12\x12\x0e\n\x06values\x18\x02 \x01(\x0c\"G\n\x0cResultExtras\x12&\n\x0b\x65vent_token\x18\x01 \x01(\x0b\x32\x11.query.EventToken\x12\x0f\n\x07\x66resher\x18\x02 \x01(\x08\"\x94\x01\n\x0bQueryResult\x12\x1c\n\x06\x66ields\x18\x01 \x03(\x0b\x32\x0c.query.Field\x12\x15\n\rrows_affected\x18\x02 \x01(\x04\x12\x11\n\tinsert_id\x18\x03 \x01(\x04\x12\x18\n\x04rows\x18\x04 \x03(\x0b\x32\n.query.Row\x12#\n\x06\x65xtras\x18\x05 \x01(\x0b\x32\x13.query.ResultExtras\"\xca\x02\n\x0bStreamEvent\x12\x30\n\nstatements\x18\x01 \x03(\x0b\x32\x1c.query.StreamEvent.Statement\x12&\n\x0b\x65vent_token\x18\x02 \x01(\x0b\x32\x11.query.EventToken\x1a\xe0\x01\n\tStatement\x12\x37\n\x08\x63\x61tegory\x18\x01 \x01(\x0e\x32%.query.StreamEvent.Statement.Category\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12(\n\x12primary_key_fields\x18\x03 \x03(\x0b\x32\x0c.query.Field\x12&\n\x12primary_key_values\x18\x04 \x03(\x0b\x32\n.query.Row\x12\x0b\n\x03sql\x18\x05 \x01(\x0c\"\'\n\x08\x43\x61tegory\x12\t\n\x05\x45rror\x10\x00\x12\x07\n\x03\x44ML\x10\x01\x12\x07\n\x03\x44\x44L\x10\x02\"\xf3\x01\n\x0e\x45xecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0etransaction_id\x18\x05 \x01(\x03\x12&\n\x07options\x18\x06 \x01(\x0b\x32\x15.query.ExecuteOptions\"5\n\x0f\x45xecuteResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.query.QueryResult\"U\n\x0fResultWithError\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12\"\n\x06result\x18\x02 \x01(\x0b\x32\x12.query.QueryResult\"\x92\x02\n\x13\x45xecuteBatchRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\"\n\x07queries\x18\x04 \x03(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0e\x61s_transaction\x18\x05 \x01(\x08\x12\x16\n\x0etransaction_id\x18\x06 \x01(\x03\x12&\n\x07options\x18\x07 \x01(\x0b\x32\x15.query.ExecuteOptions\";\n\x14\x45xecuteBatchResponse\x12#\n\x07results\x18\x01 \x03(\x0b\x32\x12.query.QueryResult\"\xe1\x01\n\x14StreamExecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12&\n\x07options\x18\x05 \x01(\x0b\x32\x15.query.ExecuteOptions\";\n\x15StreamExecuteResponse\x12\"\n\x06result\x18\x01 \x01(\x0b\x32\x12.query.QueryResult\"\x8f\x01\n\x0c\x42\x65ginRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\"\'\n\rBeginResponse\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x03\"\xa8\x01\n\rCommitRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\"\x10\n\x0e\x43ommitResponse\"\xaa\x01\n\x0fRollbackRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\"\x12\n\x10RollbackResponse\"\xb7\x01\n\x0ePrepareRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x11\n\x0fPrepareResponse\"\xa6\x01\n\x15\x43ommitPreparedRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"\x18\n\x16\x43ommitPreparedResponse\"\xc0\x01\n\x17RollbackPreparedRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x1a\n\x18RollbackPreparedResponse\"\xce\x01\n\x18\x43reateTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\x12#\n\x0cparticipants\x18\x05 \x03(\x0b\x32\r.query.Target\"\x1b\n\x19\x43reateTransactionResponse\"\xbb\x01\n\x12StartCommitRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x15\n\x13StartCommitResponse\"\xbb\x01\n\x12SetRollbackRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x16\n\x0etransaction_id\x18\x04 \x01(\x03\x12\x0c\n\x04\x64tid\x18\x05 \x01(\t\"\x15\n\x13SetRollbackResponse\"\xab\x01\n\x1a\x43oncludeTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"\x1d\n\x1b\x43oncludeTransactionResponse\"\xa7\x01\n\x16ReadTransactionRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x0c\n\x04\x64tid\x18\x04 \x01(\t\"G\n\x17ReadTransactionResponse\x12,\n\x08metadata\x18\x01 \x01(\x0b\x32\x1a.query.TransactionMetadata\"\xe0\x01\n\x13\x42\x65ginExecuteRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12&\n\x07options\x18\x05 \x01(\x0b\x32\x15.query.ExecuteOptions\"r\n\x14\x42\x65ginExecuteResponse\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12\"\n\x06result\x18\x02 \x01(\x0b\x32\x12.query.QueryResult\x12\x16\n\x0etransaction_id\x18\x03 \x01(\x03\"\xff\x01\n\x18\x42\x65ginExecuteBatchRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\"\n\x07queries\x18\x04 \x03(\x0b\x32\x11.query.BoundQuery\x12\x16\n\x0e\x61s_transaction\x18\x05 \x01(\x08\x12&\n\x07options\x18\x06 \x01(\x0b\x32\x15.query.ExecuteOptions\"x\n\x19\x42\x65ginExecuteBatchResponse\x12\x1e\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x0f.vtrpc.RPCError\x12#\n\x07results\x18\x02 \x03(\x0b\x32\x12.query.QueryResult\x12\x16\n\x0etransaction_id\x18\x03 \x01(\x03\"\xe7\x02\n\x11SplitQueryRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12 \n\x05query\x18\x04 \x01(\x0b\x32\x11.query.BoundQuery\x12\x14\n\x0csplit_column\x18\x05 \x03(\t\x12\x13\n\x0bsplit_count\x18\x06 \x01(\x03\x12\x1f\n\x17num_rows_per_query_part\x18\x08 \x01(\x03\x12\x35\n\talgorithm\x18\t \x01(\x0e\x32\".query.SplitQueryRequest.Algorithm\",\n\tAlgorithm\x12\x10\n\x0c\x45QUAL_SPLITS\x10\x00\x12\r\n\tFULL_SCAN\x10\x01\"A\n\nQuerySplit\x12 \n\x05query\x18\x01 \x01(\x0b\x32\x11.query.BoundQuery\x12\x11\n\trow_count\x18\x02 \x01(\x03\"8\n\x12SplitQueryResponse\x12\"\n\x07queries\x18\x01 \x03(\x0b\x32\x11.query.QuerySplit\"\x15\n\x13StreamHealthRequest\"\xb6\x01\n\rRealtimeStats\x12\x14\n\x0chealth_error\x18\x01 \x01(\t\x12\x1d\n\x15seconds_behind_master\x18\x02 \x01(\r\x12\x1c\n\x14\x62inlog_players_count\x18\x03 \x01(\x05\x12\x32\n*seconds_behind_master_filtered_replication\x18\x04 \x01(\x03\x12\x11\n\tcpu_usage\x18\x05 \x01(\x01\x12\x0b\n\x03qps\x18\x06 \x01(\x01\"\xa4\x01\n\x14StreamHealthResponse\x12\x1d\n\x06target\x18\x01 \x01(\x0b\x32\r.query.Target\x12\x0f\n\x07serving\x18\x02 \x01(\x08\x12.\n&tablet_externally_reparented_timestamp\x18\x03 \x01(\x03\x12,\n\x0erealtime_stats\x18\x04 \x01(\x0b\x32\x14.query.RealtimeStats\"\xbb\x01\n\x13UpdateStreamRequest\x12,\n\x13\x65\x66\x66\x65\x63tive_caller_id\x18\x01 \x01(\x0b\x32\x0f.vtrpc.CallerID\x12\x32\n\x13immediate_caller_id\x18\x02 \x01(\x0b\x32\x15.query.VTGateCallerID\x12\x1d\n\x06target\x18\x03 \x01(\x0b\x32\r.query.Target\x12\x10\n\x08position\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\"9\n\x14UpdateStreamResponse\x12!\n\x05\x65vent\x18\x01 \x01(\x0b\x32\x12.query.StreamEvent\"\x86\x01\n\x13TransactionMetadata\x12\x0c\n\x04\x64tid\x18\x01 \x01(\t\x12&\n\x05state\x18\x02 \x01(\x0e\x32\x17.query.TransactionState\x12\x14\n\x0ctime_created\x18\x03 \x01(\x03\x12#\n\x0cparticipants\x18\x04 \x03(\x0b\x32\r.query.Target*\x92\x03\n\tMySqlFlag\x12\t\n\x05\x45MPTY\x10\x00\x12\x11\n\rNOT_NULL_FLAG\x10\x01\x12\x10\n\x0cPRI_KEY_FLAG\x10\x02\x12\x13\n\x0fUNIQUE_KEY_FLAG\x10\x04\x12\x15\n\x11MULTIPLE_KEY_FLAG\x10\x08\x12\r\n\tBLOB_FLAG\x10\x10\x12\x11\n\rUNSIGNED_FLAG\x10 \x12\x11\n\rZEROFILL_FLAG\x10@\x12\x10\n\x0b\x42INARY_FLAG\x10\x80\x01\x12\x0e\n\tENUM_FLAG\x10\x80\x02\x12\x18\n\x13\x41UTO_INCREMENT_FLAG\x10\x80\x04\x12\x13\n\x0eTIMESTAMP_FLAG\x10\x80\x08\x12\r\n\x08SET_FLAG\x10\x80\x10\x12\x1a\n\x15NO_DEFAULT_VALUE_FLAG\x10\x80 \x12\x17\n\x12ON_UPDATE_NOW_FLAG\x10\x80@\x12\x0e\n\x08NUM_FLAG\x10\x80\x80\x02\x12\x13\n\rPART_KEY_FLAG\x10\x80\x80\x01\x12\x10\n\nGROUP_FLAG\x10\x80\x80\x02\x12\x11\n\x0bUNIQUE_FLAG\x10\x80\x80\x04\x12\x11\n\x0b\x42INCMP_FLAG\x10\x80\x80\x08\x1a\x02\x10\x01*k\n\x04\x46lag\x12\x08\n\x04NONE\x10\x00\x12\x0f\n\nISINTEGRAL\x10\x80\x02\x12\x0f\n\nISUNSIGNED\x10\x80\x04\x12\x0c\n\x07ISFLOAT\x10\x80\x08\x12\r\n\x08ISQUOTED\x10\x80\x10\x12\x0b\n\x06ISTEXT\x10\x80 \x12\r\n\x08ISBINARY\x10\x80@*\x89\x03\n\x04Type\x12\r\n\tNULL_TYPE\x10\x00\x12\t\n\x04INT8\x10\x81\x02\x12\n\n\x05UINT8\x10\x82\x06\x12\n\n\x05INT16\x10\x83\x02\x12\x0b\n\x06UINT16\x10\x84\x06\x12\n\n\x05INT24\x10\x85\x02\x12\x0b\n\x06UINT24\x10\x86\x06\x12\n\n\x05INT32\x10\x87\x02\x12\x0b\n\x06UINT32\x10\x88\x06\x12\n\n\x05INT64\x10\x89\x02\x12\x0b\n\x06UINT64\x10\x8a\x06\x12\x0c\n\x07\x46LOAT32\x10\x8b\x08\x12\x0c\n\x07\x46LOAT64\x10\x8c\x08\x12\x0e\n\tTIMESTAMP\x10\x8d\x10\x12\t\n\x04\x44\x41TE\x10\x8e\x10\x12\t\n\x04TIME\x10\x8f\x10\x12\r\n\x08\x44\x41TETIME\x10\x90\x10\x12\t\n\x04YEAR\x10\x91\x06\x12\x0b\n\x07\x44\x45\x43IMAL\x10\x12\x12\t\n\x04TEXT\x10\x93\x30\x12\t\n\x04\x42LOB\x10\x94P\x12\x0c\n\x07VARCHAR\x10\x95\x30\x12\x0e\n\tVARBINARY\x10\x96P\x12\t\n\x04\x43HAR\x10\x97\x30\x12\x0b\n\x06\x42INARY\x10\x98P\x12\x08\n\x03\x42IT\x10\x99\x10\x12\t\n\x04\x45NUM\x10\x9a\x10\x12\x08\n\x03SET\x10\x9b\x10\x12\t\n\x05TUPLE\x10\x1c\x12\r\n\x08GEOMETRY\x10\x9d\x10\x12\t\n\x04JSON\x10\x9e\x10*F\n\x10TransactionState\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07PREPARE\x10\x01\x12\n\n\x06\x43OMMIT\x10\x02\x12\x0c\n\x08ROLLBACK\x10\x03\x42\x1a\n\x18\x63om.youtube.vitess.protob\x06proto3')
   ,
   dependencies=[topodata__pb2.DESCRIPTOR,vtrpc__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
+_MYSQLFLAG = _descriptor.EnumDescriptor(
+  name='MySqlFlag',
+  full_name='query.MySqlFlag',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='EMPTY', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NOT_NULL_FLAG', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PRI_KEY_FLAG', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UNIQUE_KEY_FLAG', index=3, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MULTIPLE_KEY_FLAG', index=4, number=8,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BLOB_FLAG', index=5, number=16,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UNSIGNED_FLAG', index=6, number=32,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ZEROFILL_FLAG', index=7, number=64,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BINARY_FLAG', index=8, number=128,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ENUM_FLAG', index=9, number=256,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='AUTO_INCREMENT_FLAG', index=10, number=512,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TIMESTAMP_FLAG', index=11, number=1024,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SET_FLAG', index=12, number=2048,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NO_DEFAULT_VALUE_FLAG', index=13, number=4096,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ON_UPDATE_NOW_FLAG', index=14, number=8192,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NUM_FLAG', index=15, number=32768,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PART_KEY_FLAG', index=16, number=16384,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='GROUP_FLAG', index=17, number=32768,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UNIQUE_FLAG', index=18, number=65536,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BINCMP_FLAG', index=19, number=131072,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=_descriptor._ParseOptions(descriptor_pb2.EnumOptions(), _b('\020\001')),
+  serialized_start=6798,
+  serialized_end=7200,
+)
+_sym_db.RegisterEnumDescriptor(_MYSQLFLAG)
+
+MySqlFlag = enum_type_wrapper.EnumTypeWrapper(_MYSQLFLAG)
 _FLAG = _descriptor.EnumDescriptor(
   name='Flag',
   full_name='query.Flag',
@@ -64,8 +159,8 @@ _FLAG = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6604,
-  serialized_end=6711,
+  serialized_start=7202,
+  serialized_end=7309,
 )
 _sym_db.RegisterEnumDescriptor(_FLAG)
 
@@ -203,8 +298,8 @@ _TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6714,
-  serialized_end=7107,
+  serialized_start=7312,
+  serialized_end=7705,
 )
 _sym_db.RegisterEnumDescriptor(_TYPE)
 
@@ -234,12 +329,32 @@ _TRANSACTIONSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=7109,
-  serialized_end=7179,
+  serialized_start=7707,
+  serialized_end=7777,
 )
 _sym_db.RegisterEnumDescriptor(_TRANSACTIONSTATE)
 
 TransactionState = enum_type_wrapper.EnumTypeWrapper(_TRANSACTIONSTATE)
+EMPTY = 0
+NOT_NULL_FLAG = 1
+PRI_KEY_FLAG = 2
+UNIQUE_KEY_FLAG = 4
+MULTIPLE_KEY_FLAG = 8
+BLOB_FLAG = 16
+UNSIGNED_FLAG = 32
+ZEROFILL_FLAG = 64
+BINARY_FLAG = 128
+ENUM_FLAG = 256
+AUTO_INCREMENT_FLAG = 512
+TIMESTAMP_FLAG = 1024
+SET_FLAG = 2048
+NO_DEFAULT_VALUE_FLAG = 4096
+ON_UPDATE_NOW_FLAG = 8192
+NUM_FLAG = 32768
+PART_KEY_FLAG = 16384
+GROUP_FLAG = 32768
+UNIQUE_FLAG = 65536
+BINCMP_FLAG = 131072
 NONE = 0
 ISINTEGRAL = 256
 ISUNSIGNED = 512
@@ -305,8 +420,8 @@ _STREAMEVENT_STATEMENT_CATEGORY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1273,
-  serialized_end=1312,
+  serialized_start=1466,
+  serialized_end=1505,
 )
 _sym_db.RegisterEnumDescriptor(_STREAMEVENT_STATEMENT_CATEGORY)
 
@@ -327,8 +442,8 @@ _SPLITQUERYREQUEST_ALGORITHM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=5672,
-  serialized_end=5716,
+  serialized_start=5865,
+  serialized_end=5909,
 )
 _sym_db.RegisterEnumDescriptor(_SPLITQUERYREQUEST_ALGORITHM)
 
@@ -640,6 +755,13 @@ _EXECUTEOPTIONS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='exclude_field_metadata', full_name='query.ExecuteOptions.exclude_field_metadata', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -652,8 +774,8 @@ _EXECUTEOPTIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=543,
-  serialized_end=665,
+  serialized_start=544,
+  serialized_end=698,
 )
 
 
@@ -678,6 +800,69 @@ _FIELD = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='table', full_name='query.Field.table', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='schema', full_name='query.Field.schema', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='org_table', full_name='query.Field.org_table', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='database', full_name='query.Field.database', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='org_name', full_name='query.Field.org_name', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='column_length', full_name='query.Field.column_length', index=7,
+      number=8, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='charset', full_name='query.Field.charset', index=8,
+      number=9, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='decimals', full_name='query.Field.decimals', index=9,
+      number=10, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='flags', full_name='query.Field.flags', index=10,
+      number=11, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -690,8 +875,8 @@ _FIELD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=667,
-  serialized_end=715,
+  serialized_start=701,
+  serialized_end=908,
 )
 
 
@@ -728,8 +913,8 @@ _ROW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=717,
-  serialized_end=755,
+  serialized_start=910,
+  serialized_end=948,
 )
 
 
@@ -766,8 +951,8 @@ _RESULTEXTRAS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=757,
-  serialized_end=828,
+  serialized_start=950,
+  serialized_end=1021,
 )
 
 
@@ -825,8 +1010,8 @@ _QUERYRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=831,
-  serialized_end=979,
+  serialized_start=1024,
+  serialized_end=1172,
 )
 
 
@@ -885,8 +1070,8 @@ _STREAMEVENT_STATEMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1088,
-  serialized_end=1312,
+  serialized_start=1281,
+  serialized_end=1505,
 )
 
 _STREAMEVENT = _descriptor.Descriptor(
@@ -922,8 +1107,8 @@ _STREAMEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=982,
-  serialized_end=1312,
+  serialized_start=1175,
+  serialized_end=1505,
 )
 
 
@@ -988,8 +1173,8 @@ _EXECUTEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1315,
-  serialized_end=1558,
+  serialized_start=1508,
+  serialized_end=1751,
 )
 
 
@@ -1019,8 +1204,8 @@ _EXECUTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1560,
-  serialized_end=1613,
+  serialized_start=1753,
+  serialized_end=1806,
 )
 
 
@@ -1057,8 +1242,8 @@ _RESULTWITHERROR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1615,
-  serialized_end=1700,
+  serialized_start=1808,
+  serialized_end=1893,
 )
 
 
@@ -1130,8 +1315,8 @@ _EXECUTEBATCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1703,
-  serialized_end=1977,
+  serialized_start=1896,
+  serialized_end=2170,
 )
 
 
@@ -1161,8 +1346,8 @@ _EXECUTEBATCHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1979,
-  serialized_end=2038,
+  serialized_start=2172,
+  serialized_end=2231,
 )
 
 
@@ -1220,8 +1405,8 @@ _STREAMEXECUTEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2041,
-  serialized_end=2266,
+  serialized_start=2234,
+  serialized_end=2459,
 )
 
 
@@ -1251,8 +1436,8 @@ _STREAMEXECUTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2268,
-  serialized_end=2327,
+  serialized_start=2461,
+  serialized_end=2520,
 )
 
 
@@ -1296,8 +1481,8 @@ _BEGINREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2330,
-  serialized_end=2473,
+  serialized_start=2523,
+  serialized_end=2666,
 )
 
 
@@ -1327,8 +1512,8 @@ _BEGINRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2475,
-  serialized_end=2514,
+  serialized_start=2668,
+  serialized_end=2707,
 )
 
 
@@ -1379,8 +1564,8 @@ _COMMITREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2517,
-  serialized_end=2685,
+  serialized_start=2710,
+  serialized_end=2878,
 )
 
 
@@ -1403,8 +1588,8 @@ _COMMITRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2687,
-  serialized_end=2703,
+  serialized_start=2880,
+  serialized_end=2896,
 )
 
 
@@ -1455,8 +1640,8 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2706,
-  serialized_end=2876,
+  serialized_start=2899,
+  serialized_end=3069,
 )
 
 
@@ -1479,8 +1664,8 @@ _ROLLBACKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2878,
-  serialized_end=2896,
+  serialized_start=3071,
+  serialized_end=3089,
 )
 
 
@@ -1538,8 +1723,8 @@ _PREPAREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2899,
-  serialized_end=3082,
+  serialized_start=3092,
+  serialized_end=3275,
 )
 
 
@@ -1562,8 +1747,8 @@ _PREPARERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3084,
-  serialized_end=3101,
+  serialized_start=3277,
+  serialized_end=3294,
 )
 
 
@@ -1614,8 +1799,8 @@ _COMMITPREPAREDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3104,
-  serialized_end=3270,
+  serialized_start=3297,
+  serialized_end=3463,
 )
 
 
@@ -1638,8 +1823,8 @@ _COMMITPREPAREDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3272,
-  serialized_end=3296,
+  serialized_start=3465,
+  serialized_end=3489,
 )
 
 
@@ -1697,8 +1882,8 @@ _ROLLBACKPREPAREDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3299,
-  serialized_end=3491,
+  serialized_start=3492,
+  serialized_end=3684,
 )
 
 
@@ -1721,8 +1906,8 @@ _ROLLBACKPREPAREDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3493,
-  serialized_end=3519,
+  serialized_start=3686,
+  serialized_end=3712,
 )
 
 
@@ -1780,8 +1965,8 @@ _CREATETRANSACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3522,
-  serialized_end=3728,
+  serialized_start=3715,
+  serialized_end=3921,
 )
 
 
@@ -1804,8 +1989,8 @@ _CREATETRANSACTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3730,
-  serialized_end=3757,
+  serialized_start=3923,
+  serialized_end=3950,
 )
 
 
@@ -1863,8 +2048,8 @@ _STARTCOMMITREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3760,
-  serialized_end=3947,
+  serialized_start=3953,
+  serialized_end=4140,
 )
 
 
@@ -1887,8 +2072,8 @@ _STARTCOMMITRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3949,
-  serialized_end=3970,
+  serialized_start=4142,
+  serialized_end=4163,
 )
 
 
@@ -1946,8 +2131,8 @@ _SETROLLBACKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3973,
-  serialized_end=4160,
+  serialized_start=4166,
+  serialized_end=4353,
 )
 
 
@@ -1970,8 +2155,8 @@ _SETROLLBACKRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4162,
-  serialized_end=4183,
+  serialized_start=4355,
+  serialized_end=4376,
 )
 
 
@@ -2022,8 +2207,8 @@ _CONCLUDETRANSACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4186,
-  serialized_end=4357,
+  serialized_start=4379,
+  serialized_end=4550,
 )
 
 
@@ -2046,8 +2231,8 @@ _CONCLUDETRANSACTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4359,
-  serialized_end=4388,
+  serialized_start=4552,
+  serialized_end=4581,
 )
 
 
@@ -2098,8 +2283,8 @@ _READTRANSACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4391,
-  serialized_end=4558,
+  serialized_start=4584,
+  serialized_end=4751,
 )
 
 
@@ -2129,8 +2314,8 @@ _READTRANSACTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4560,
-  serialized_end=4631,
+  serialized_start=4753,
+  serialized_end=4824,
 )
 
 
@@ -2188,8 +2373,8 @@ _BEGINEXECUTEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4634,
-  serialized_end=4858,
+  serialized_start=4827,
+  serialized_end=5051,
 )
 
 
@@ -2233,8 +2418,8 @@ _BEGINEXECUTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4860,
-  serialized_end=4974,
+  serialized_start=5053,
+  serialized_end=5167,
 )
 
 
@@ -2299,8 +2484,8 @@ _BEGINEXECUTEBATCHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4977,
-  serialized_end=5232,
+  serialized_start=5170,
+  serialized_end=5425,
 )
 
 
@@ -2344,8 +2529,8 @@ _BEGINEXECUTEBATCHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5234,
-  serialized_end=5354,
+  serialized_start=5427,
+  serialized_end=5547,
 )
 
 
@@ -2425,8 +2610,8 @@ _SPLITQUERYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5357,
-  serialized_end=5716,
+  serialized_start=5550,
+  serialized_end=5909,
 )
 
 
@@ -2463,8 +2648,8 @@ _QUERYSPLIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5718,
-  serialized_end=5783,
+  serialized_start=5911,
+  serialized_end=5976,
 )
 
 
@@ -2494,8 +2679,8 @@ _SPLITQUERYRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5785,
-  serialized_end=5841,
+  serialized_start=5978,
+  serialized_end=6034,
 )
 
 
@@ -2518,8 +2703,8 @@ _STREAMHEALTHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5843,
-  serialized_end=5864,
+  serialized_start=6036,
+  serialized_end=6057,
 )
 
 
@@ -2584,8 +2769,8 @@ _REALTIMESTATS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5867,
-  serialized_end=6049,
+  serialized_start=6060,
+  serialized_end=6242,
 )
 
 
@@ -2636,8 +2821,8 @@ _STREAMHEALTHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6052,
-  serialized_end=6216,
+  serialized_start=6245,
+  serialized_end=6409,
 )
 
 
@@ -2695,8 +2880,8 @@ _UPDATESTREAMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6219,
-  serialized_end=6406,
+  serialized_start=6412,
+  serialized_end=6599,
 )
 
 
@@ -2726,8 +2911,8 @@ _UPDATESTREAMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6408,
-  serialized_end=6465,
+  serialized_start=6601,
+  serialized_end=6658,
 )
 
 
@@ -2778,8 +2963,8 @@ _TRANSACTIONMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6468,
-  serialized_end=6602,
+  serialized_start=6661,
+  serialized_end=6795,
 )
 
 _TARGET.fields_by_name['tablet_type'].enum_type = topodata__pb2._TABLETTYPE
@@ -2941,6 +3126,7 @@ DESCRIPTOR.message_types_by_name['StreamHealthResponse'] = _STREAMHEALTHRESPONSE
 DESCRIPTOR.message_types_by_name['UpdateStreamRequest'] = _UPDATESTREAMREQUEST
 DESCRIPTOR.message_types_by_name['UpdateStreamResponse'] = _UPDATESTREAMRESPONSE
 DESCRIPTOR.message_types_by_name['TransactionMetadata'] = _TRANSACTIONMETADATA
+DESCRIPTOR.enum_types_by_name['MySqlFlag'] = _MYSQLFLAG
 DESCRIPTOR.enum_types_by_name['Flag'] = _FLAG
 DESCRIPTOR.enum_types_by_name['Type'] = _TYPE
 DESCRIPTOR.enum_types_by_name['TransactionState'] = _TRANSACTIONSTATE
@@ -3342,6 +3528,8 @@ _sym_db.RegisterMessage(TransactionMetadata)
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\030com.youtube.vitess.proto'))
+_MYSQLFLAG.has_options = True
+_MYSQLFLAG._options = _descriptor._ParseOptions(descriptor_pb2.EnumOptions(), _b('\020\001'))
 _BOUNDQUERY_BINDVARIABLESENTRY.has_options = True
 _BOUNDQUERY_BINDVARIABLESENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 import grpc

@@ -64,6 +64,7 @@ func TestBinary(t *testing.T) {
 			{
 				Name: "binval",
 				Type: sqltypes.VarBinary,
+				Table: "vitess_test",
 			},
 		},
 		RowsAffected: 1,

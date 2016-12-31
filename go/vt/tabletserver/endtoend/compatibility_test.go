@@ -27,15 +27,19 @@ func TestCharaterSet(t *testing.T) {
 			{
 				Name: "intval",
 				Type: sqltypes.Int32,
+				Table: "vitess_test",
 			}, {
 				Name: "floatval",
 				Type: sqltypes.Float32,
+				Table: "vitess_test",
 			}, {
 				Name: "charval",
 				Type: sqltypes.VarChar,
+				Table: "vitess_test",
 			}, {
 				Name: "binval",
 				Type: sqltypes.VarBinary,
+				Table: "vitess_test",
 			},
 		},
 		RowsAffected: 1,
@@ -86,36 +90,47 @@ func TestInts(t *testing.T) {
 			{
 				Name: "tiny",
 				Type: sqltypes.Int8,
+				Table: "vitess_ints",
 			}, {
 				Name: "tinyu",
 				Type: sqltypes.Uint8,
+				Table: "vitess_ints",
 			}, {
 				Name: "small",
 				Type: sqltypes.Int16,
+				Table: "vitess_ints",
 			}, {
 				Name: "smallu",
 				Type: sqltypes.Uint16,
+				Table: "vitess_ints",
 			}, {
 				Name: "medium",
 				Type: sqltypes.Int24,
+				Table: "vitess_ints",
 			}, {
 				Name: "mediumu",
 				Type: sqltypes.Uint24,
+				Table: "vitess_ints",
 			}, {
 				Name: "normal",
 				Type: sqltypes.Int32,
+				Table: "vitess_ints",
 			}, {
 				Name: "normalu",
 				Type: sqltypes.Uint32,
+				Table: "vitess_ints",
 			}, {
 				Name: "big",
 				Type: sqltypes.Int64,
+				Table: "vitess_ints",
 			}, {
 				Name: "bigu",
 				Type: sqltypes.Uint64,
+				Table: "vitess_ints",
 			}, {
 				Name: "y",
 				Type: sqltypes.Year,
+				Table: "vitess_ints",
 			},
 		},
 		RowsAffected: 1,
@@ -190,18 +205,23 @@ func TestFractionals(t *testing.T) {
 			{
 				Name: "id",
 				Type: sqltypes.Int32,
+				Table: "vitess_fracts",
 			}, {
 				Name: "deci",
 				Type: sqltypes.Decimal,
+				Table: "vitess_fracts",
 			}, {
 				Name: "num",
 				Type: sqltypes.Decimal,
+				Table: "vitess_fracts",
 			}, {
 				Name: "f",
 				Type: sqltypes.Float32,
+				Table: "vitess_fracts",
 			}, {
 				Name: "d",
 				Type: sqltypes.Float64,
+				Table: "vitess_fracts",
 			},
 		},
 		RowsAffected: 1,
@@ -252,33 +272,43 @@ func TestStrings(t *testing.T) {
 			{
 				Name: "vb",
 				Type: sqltypes.VarBinary,
+				Table: "vitess_strings",
 			}, {
 				Name: "c",
 				Type: sqltypes.Char,
+				Table: "vitess_strings",
 			}, {
 				Name: "vc",
 				Type: sqltypes.VarChar,
+				Table: "vitess_strings",
 			}, {
 				Name: "b",
 				Type: sqltypes.Binary,
+				Table: "vitess_strings",
 			}, {
 				Name: "tb",
 				Type: sqltypes.Blob,
+				Table: "vitess_strings",
 			}, {
 				Name: "bl",
 				Type: sqltypes.Blob,
+				Table: "vitess_strings",
 			}, {
 				Name: "ttx",
 				Type: sqltypes.Text,
+				Table: "vitess_strings",
 			}, {
 				Name: "tx",
 				Type: sqltypes.Text,
+				Table: "vitess_strings",
 			}, {
 				Name: "en",
 				Type: sqltypes.Enum,
+				Table: "vitess_strings",
 			}, {
 				Name: "s",
 				Type: sqltypes.Set,
+				Table: "vitess_strings",
 			},
 		},
 		RowsAffected: 1,
@@ -329,21 +359,27 @@ func TestMiscTypes(t *testing.T) {
 			{
 				Name: "id",
 				Type: sqltypes.Int32,
+				Table: "vitess_misc",
 			}, {
 				Name: "b",
 				Type: sqltypes.Bit,
+				Table: "vitess_misc",
 			}, {
 				Name: "d",
 				Type: sqltypes.Date,
+				Table: "vitess_misc",
 			}, {
 				Name: "dt",
 				Type: sqltypes.Datetime,
+				Table: "vitess_misc",
 			}, {
 				Name: "t",
 				Type: sqltypes.Time,
+				Table: "vitess_misc",
 			}, {
 				Name: "g",
 				Type: sqltypes.Geometry,
+				Table: "vitess_misc",
 			},
 		},
 		RowsAffected: 1,
@@ -505,9 +541,11 @@ func TestJSONType(t *testing.T) {
 			{
 				Name: "id",
 				Type: sqltypes.Int32,
+				Table: "vitess_json",
 			}, {
 				Name: "val",
 				Type: sqltypes.TypeJSON,
+				Table: "vitess_json",
 			},
 		},
 		RowsAffected: 1,

@@ -1,16 +1,18 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessConnection;
-import com.flipkart.vitess.jdbc.VitessDriver;
-import com.flipkart.vitess.util.Constants;
-import com.youtube.vitess.proto.Topodata;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.util.Properties;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import com.flipkart.vitess.jdbc.VitessConnection;
+import com.flipkart.vitess.jdbc.VitessDriver;
+import com.flipkart.vitess.util.Constants;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by harshit.gangal on 19/01/16.
@@ -35,7 +37,7 @@ public class VitessDriverTest {
     @Test public void testConnect() {
         try {
             VitessConnection connection =
-                (VitessConnection) DriverManager.getConnection(dbURL, null);
+                (VitessConnection) DriverManager.getConnection(dbURL, new Properties());
             Assert.assertEquals(connection.getUrl(), dbURL);
         } catch (SQLException e) {
             Assert.fail("SQLException Not Expected");

@@ -1,22 +1,43 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.Constants;
-import com.google.protobuf.ByteString;
-import com.youtube.vitess.client.cursor.Cursor;
-import com.youtube.vitess.client.cursor.Row;
-import com.youtube.vitess.client.cursor.SimpleCursor;
-import com.youtube.vitess.proto.Query;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.StringUtils;
+import com.google.protobuf.ByteString;
+import com.youtube.vitess.client.cursor.Cursor;
+import com.youtube.vitess.client.cursor.Row;
+import com.youtube.vitess.client.cursor.SimpleCursor;
+import com.youtube.vitess.proto.Query;
 
 
 /**
@@ -26,9 +47,10 @@ public class VitessResultSet implements ResultSet {
 
     /* Get actual class name to be printed on */
     private static Logger logger = Logger.getLogger(VitessResultSet.class.getName());
+    private final VitessConnection connection;
 
     private Cursor cursor;
-    private List<Query.Field> fields;
+    private List<FieldWithMetadata> fields;
     private VitessStatement vitessStatement;
     private boolean closed = false;
     private Row row;
@@ -40,11 +62,12 @@ public class VitessResultSet implements ResultSet {
      */
     private int lastIndexRead = -1;
 
-    public VitessResultSet(Cursor cursor) throws SQLException {
-        this(cursor, null);
+    public VitessResultSet(VitessConnection connection, Cursor cursor) throws SQLException {
+        this(connection, cursor, null);
     }
 
-    public VitessResultSet(Cursor cursor, VitessStatement vitessStatement) throws SQLException {
+    public VitessResultSet(VitessConnection connection, Cursor cursor, VitessStatement vitessStatement) throws SQLException {
+        this.connection = connection;
         if (null == cursor) {
             throw new SQLException(Constants.SQLExceptionMessages.CURSOR_NULL);
         }
@@ -52,7 +75,7 @@ public class VitessResultSet implements ResultSet {
         this.cursor = cursor;
         this.vitessStatement = vitessStatement;
         try {
-            this.fields = this.cursor.getFields();
+            this.fields = enhancedFieldsFromCursor();
         } catch (SQLException e) {
             throw new SQLException(Constants.SQLExceptionMessages.RESULT_SET_INIT_ERROR, e);
         }
@@ -63,8 +86,9 @@ public class VitessResultSet implements ResultSet {
         }
     }
 
-    public VitessResultSet(String[] columnNames, Query.Type[] columnTypes, String[][] data)
+    public VitessResultSet(VitessConnection connection, String[] columnNames, Query.Type[] columnTypes, String[][] data)
         throws SQLException {
+        this.connection = connection;
 
         if (columnNames.length != columnTypes.length) {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_RESULT_SET);
@@ -93,15 +117,16 @@ public class VitessResultSet implements ResultSet {
         this.cursor = new SimpleCursor(queryResultBuilder.build());
         this.vitessStatement = null;
         try {
-            this.fields = this.cursor.getFields();
+            this.fields = enhancedFieldsFromCursor();
         } catch (SQLException e) {
             throw new SQLException(Constants.SQLExceptionMessages.RESULT_SET_INIT_ERROR, e);
         }
         this.currentRow = 0;
     }
 
-    public VitessResultSet(String[] columnNames, Query.Type[] columnTypes,
+    public VitessResultSet(VitessConnection connection, String[] columnNames, Query.Type[] columnTypes,
         ArrayList<ArrayList<String>> data) throws SQLException {
+        this.connection = connection;
 
         if (columnNames.length != columnTypes.length) {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_RESULT_SET);
@@ -132,11 +157,25 @@ public class VitessResultSet implements ResultSet {
         this.cursor = new SimpleCursor(queryResultBuilder.build());
         this.vitessStatement = null;
         try {
-            fields = cursor.getFields();
+            this.fields = enhancedFieldsFromCursor();
         } catch (SQLException e) {
             throw new SQLException(Constants.SQLExceptionMessages.RESULT_SET_INIT_ERROR, e);
         }
         this.currentRow = 0;
+    }
+
+    private List<FieldWithMetadata> enhancedFieldsFromCursor() throws SQLException {
+        List<Query.Field> rawFields = cursor.getFields();
+        if (rawFields == null) {
+            return null;
+        }
+
+        List<FieldWithMetadata> fields = new ArrayList<>(rawFields.size());
+        for (Query.Field field : rawFields) {
+            fields.add(new FieldWithMetadata(connection, field));
+        }
+
+        return fields;
     }
 
     public boolean next() throws SQLException {
@@ -148,6 +187,10 @@ public class VitessResultSet implements ResultSet {
 
         this.row = this.cursor.next();
         ++this.currentRow;
+
+        if (this.fields == null) {
+            this.fields = enhancedFieldsFromCursor();
+        }
 
         return row != null;
     }
@@ -190,12 +233,35 @@ public class VitessResultSet implements ResultSet {
         object = this.row.getObject(columnIndex);
 
         if (object instanceof byte[]) {
-            columnValue = new String((byte[]) object);
+            if (connection.getExcludeFieldMetadata()) {
+                columnValue = convertBytesToString((byte[]) object, columnIndex);
+            } else {
+                columnValue = new String((byte[]) object);
+            }
         } else {
             columnValue = String.valueOf(object);
         }
 
         return columnValue;
+    }
+
+    private String convertBytesToString(byte[] bytes, int columnIndex) throws SQLException {
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
+        String encoding = field.getEncoding();
+
+        return convertBytesToString(bytes, field, encoding);
+    }
+
+    private String convertBytesToString(byte[] bytes, FieldWithMetadata field, String encoding) throws SQLException {
+        if (encoding == null) {
+            return StringUtils.toString(bytes);
+        } else {
+            try {
+                return StringUtils.toString(bytes, 0, bytes.length, encoding);
+            } catch (UnsupportedEncodingException e) {
+                throw new SQLException("ResultSet.Unsupported_character_encoding____101: " + encoding, e);
+            }
+        }
     }
 
     public boolean getBoolean(int columnIndex) throws SQLException {
@@ -209,9 +275,9 @@ public class VitessResultSet implements ResultSet {
         }
 
         // Mysql 5.0 and higher have a BIT Data Type, need to check for this as well.
-        Query.Field field = this.fields.get(columnIndex - 1);
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
 
-        if (field.getType() == Query.Type.BIT) {
+        if (field.getVitessTypeValue() == Query.Type.BIT_VALUE) {
             return byteArrayToBoolean(columnIndex);
         }
 
@@ -508,8 +574,9 @@ public class VitessResultSet implements ResultSet {
         //no-op, All exceptions thrown, none kept as warning
     }
 
+
     public ResultSetMetaData getMetaData() throws SQLException {
-        return new VitessResultSetMetaData(cursor.getFields());
+        return new VitessResultSetMetaData(connection, fields);
     }
 
     public Object getObject(int columnIndex) throws SQLException {
@@ -519,7 +586,87 @@ public class VitessResultSet implements ResultSet {
             return null;
         }
 
-        return this.row.getObject(columnIndex);
+        Object retVal = this.row.getObject(columnIndex);
+
+        if (!connection.getExcludeFieldMetadata() && retVal instanceof byte[]) {
+            retVal = convertBytesIfPossible((byte[]) retVal, columnIndex);
+        }
+
+        return retVal;
+    }
+
+    private Object convertBytesIfPossible(byte[] bytes, int columnIndex) throws SQLException {
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
+        String encoding = field.getEncoding();
+
+        switch (field.getJavaType()) {
+            case Types.BIT:
+                if (!field.isSingleBit()) {
+                    return getObjectDeserializingIfNeeded(bytes, field, encoding);
+                }
+
+                return byteArrayToBoolean(bytes);
+            case Types.CHAR:
+            case Types.VARCHAR:
+                if (!field.isOpaqueBinary()) {
+                    return convertBytesToString(bytes, field, encoding);
+                }
+
+                return bytes;
+            case Types.LONGVARCHAR:
+                if (!field.isOpaqueBinary()) {
+                    return convertClobToString(bytes, field, encoding);
+                }
+
+                return bytes;
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                if (field.getVitessTypeValue() == Query.Type.JSON_VALUE) {
+                    return convertBytesToString(bytes, field, encoding);
+                } else if (field.getVitessTypeValue() != Query.Type.GEOMETRY_VALUE) {
+                    return getObjectDeserializingIfNeeded(bytes, field, encoding);
+                }
+                return bytes;
+            default:
+                return convertBytesToString(bytes, field, encoding);
+        }
+    }
+
+    private Object getObjectDeserializingIfNeeded(byte[] bytes, FieldWithMetadata field, String encoding) throws SQLException {
+        if (this.connection.getAutoDeserialize()) {
+            Object obj = bytes;
+
+            if ((bytes != null) && (bytes.length >= 2)) {
+                if ((bytes[0] == -84) && (bytes[1] == -19)) {
+                    // Serialized object?
+                    try {
+                        ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytes);
+                        ObjectInputStream objIn = new ObjectInputStream(bytesIn);
+                        obj = objIn.readObject();
+                        objIn.close();
+                        bytesIn.close();
+                    } catch (ClassNotFoundException cnfe) {
+                        throw new SQLException("ResultSet.Class_not_found___91: " + cnfe.toString()
+                            + "ResultSet._while_reading_serialized_object_92");
+                    } catch (IOException ex) {
+                        obj = bytes; // not serialized?
+                    }
+                } else {
+                    return convertBytesToString(bytes, field, encoding);
+                }
+            }
+
+            return obj;
+        }
+
+        return bytes;
+    }
+
+    private String convertClobToString(byte[] bytes, FieldWithMetadata field, String encoding) throws SQLException {
+        String forcedEncoding = this.connection.getClobCharacterEncoding();
+
+        return convertBytesToString(bytes, field, forcedEncoding == null ? encoding : forcedEncoding);
     }
 
     public Object getObject(String columnLabel) throws SQLException {
@@ -1382,8 +1529,10 @@ public class VitessResultSet implements ResultSet {
     }
 
     private boolean byteArrayToBoolean(int columnIndex) throws SQLException {
-        Object value = this.row.getObject(columnIndex);
+        return byteArrayToBoolean(this.row.getObject(columnIndex));
+    }
 
+    private boolean byteArrayToBoolean(Object value) throws SQLException {
         if (value == null) {
             return false;
         }

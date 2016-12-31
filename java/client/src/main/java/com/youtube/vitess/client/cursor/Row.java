@@ -2,13 +2,6 @@ package com.youtube.vitess.client.cursor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.primitives.UnsignedLong;
-import com.google.protobuf.ByteString;
-import com.youtube.vitess.mysql.DateTime;
-import com.youtube.vitess.proto.Query;
-import com.youtube.vitess.proto.Query.Field;
-import com.youtube.vitess.proto.Query.Type;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLDataException;
@@ -19,7 +12,16 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import javax.annotation.concurrent.NotThreadSafe;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.primitives.UnsignedLong;
+import com.google.protobuf.ByteString;
+import com.youtube.vitess.mysql.DateTime;
+import com.youtube.vitess.proto.Query;
+import com.youtube.vitess.proto.Query.Field;
+import com.youtube.vitess.proto.Query.Type;
 
 /**
  * Type-converting wrapper around raw {@link com.youtube.vitess.proto.Query.Row} proto.
@@ -653,6 +655,8 @@ public class Row {
       case VARBINARY: // fall through
       case CHAR: // fall through
       case BINARY:
+      case GEOMETRY:
+      case JSON:
         return value.toByteArray();
       default:
         throw new SQLDataException("unknown field type: " + field.getType());

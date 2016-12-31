@@ -1,8 +1,9 @@
 package com.flipkart.vitess.util;
 
+import org.joda.time.Duration;
+
 import com.youtube.vitess.client.Context;
 import com.youtube.vitess.proto.Vtrpc;
-import org.joda.time.Duration;
 
 /**
  * Created by naveen.nahata on 24/02/16.
@@ -16,17 +17,21 @@ public class CommonUtils {
      * @param connectionTimeout
      * @return
      */
-    public static Context createContext(String username, long connectionTimeout) {
+    public static Context createContext(String username, boolean includeFieldMetadata, long connectionTimeout) {
         Context context;
         Vtrpc.CallerID callerID = null;
         if (null != username) {
             callerID = Vtrpc.CallerID.newBuilder().setPrincipal(username).build();
         }
         if (null != callerID) {
-            context = Context.getDefault().withDeadlineAfter(Duration.millis(connectionTimeout))
-                .withCallerId(callerID);
+            context = Context.getDefault()
+                .withDeadlineAfter(Duration.millis(connectionTimeout))
+                .withCallerId(callerID)
+                .withIncludeFieldMetadata(includeFieldMetadata);
         } else {
-            context = Context.getDefault().withDeadlineAfter(Duration.millis(connectionTimeout));
+            context = Context.getDefault()
+                .withDeadlineAfter(Duration.millis(connectionTimeout))
+                .withIncludeFieldMetadata(includeFieldMetadata);
         }
         return context;
     }

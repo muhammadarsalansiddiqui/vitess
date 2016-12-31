@@ -94,7 +94,7 @@ public class VitessResultSetMetaData implements ResultSetMetaData {
     }
 
     public String getSchemaName(int column) throws SQLException {
-        return getField(column).getSchema();
+        return getField(column).getDatabase();
     }
 
     public int getPrecision(int column) throws SQLException {

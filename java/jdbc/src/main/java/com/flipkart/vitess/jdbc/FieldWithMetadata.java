@@ -343,10 +343,6 @@ public class FieldWithMetadata {
     return field.getTable();
   }
 
-  public String getSchema() {
-    return field.getSchema();
-  }
-
   public String getOrgTable() {
     return field.getOrgTable();
   }

@@ -71,6 +71,7 @@ var TestVTGateCallerID = &querypb.VTGateCallerID{
 
 var TestExecuteOptions = &querypb.ExecuteOptions{
 	ExcludeFieldNames: true,
+	ExcludeFieldMetadata: true,
 	IncludeEventToken: true,
 	CompareEventToken: &querypb.EventToken{
 		Timestamp: 9876,

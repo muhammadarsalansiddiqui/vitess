@@ -119,7 +119,7 @@ func TestDBConnStream(t *testing.T) {
 		ctx, sql, func(r *sqltypes.Result) error {
 			result = *r
 			return nil
-		}, 10, false /*excludeFieldNames*/)
+		}, 10, false /*excludeFieldNames*/, false /*excludeFieldMetadata*/)
 	if err != nil {
 		t.Fatalf("should not get an error, err: %v", err)
 	}
@@ -129,7 +129,7 @@ func TestDBConnStream(t *testing.T) {
 	err = dbConn.Stream(
 		ctx, sql, func(r *sqltypes.Result) error {
 			return nil
-		}, 10, false /*excludeFieldNames*/)
+		}, 10, false /*excludeFieldNames*/, false /*excludeFieldMetadata*/)
 	db.DisableConnFail()
 	want := "connection fail"
 	if err == nil || !strings.Contains(err.Error(), want) {

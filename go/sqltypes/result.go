@@ -103,11 +103,11 @@ func MakeRowTrusted(fields []*querypb.Field, row *querypb.Row) []Value {
 	return sqlRow
 }
 
-// StripFieldNames will return a new Result that has the same Rows,
-// but the Field objects will have their Name emptied.  Note we don't
+// StripMetadata will return a new Result that has the same Rows,
+// but the Field objects will have their non-critical metadata emptied.  Note we don't
 // proto.Copy each Field for performance reasons, but we only copy the
 // individual fields.
-func (result *Result) StripFieldNames() *Result {
+func (result *Result) StripMetadata(stripFieldName bool, stripFieldMetadata bool) *Result {
 	if len(result.Fields) == 0 {
 		return result
 	}
@@ -117,6 +117,16 @@ func (result *Result) StripFieldNames() *Result {
 	for i, f := range result.Fields {
 		r.Fields[i] = &newFieldsArray[i]
 		newFieldsArray[i].Type = f.Type
+		if !stripFieldName && !stripFieldMetadata {
+			newFieldsArray[i].Name = f.Name
+			newFieldsArray[i].Table = f.Table
+			newFieldsArray[i].Schema = f.Schema
+			newFieldsArray[i].OrgTable = f.OrgTable
+			newFieldsArray[i].OrgName = f.OrgName
+			newFieldsArray[i].ColumnLength = f.ColumnLength
+			newFieldsArray[i].Charset = f.Charset
+			newFieldsArray[i].Decimals = f.Decimals
+		}
 	}
 	return &r
 }

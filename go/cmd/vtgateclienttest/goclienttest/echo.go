@@ -97,10 +97,11 @@ var (
 
 	options = &querypb.ExecuteOptions{
 		ExcludeFieldNames: true,
+		ExcludeFieldMetadata: true,
 		IncludeEventToken: true,
 		CompareEventToken: eventToken,
 	}
-	optionsEcho = "exclude_field_names:true include_event_token:true compare_event_token:<" + eventTokenEcho + "> "
+	optionsEcho = "exclude_field_names:true include_event_token:true compare_event_token:<" + eventTokenEcho + "> exclude_field_metadata:true "
 	extrasEcho  = "event_token:<" + eventTokenEcho + "> fresher:true "
 
 	updateStreamEcho = "map[callerId:" + callerIDEcho + " event:" + eventTokenEcho + " keyRange:" + keyRangeZeroEcho + " keyspace:conn_ks shard:echo://" + query + " tabletType:REPLICA timestamp:0]"

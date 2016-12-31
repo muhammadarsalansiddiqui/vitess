@@ -1983,6 +1983,7 @@ var testCallerID = &vtrpcpb.CallerID{
 
 var testExecuteOptions = &querypb.ExecuteOptions{
 	ExcludeFieldNames: true,
+	ExcludeFieldMetadata: true,
 	IncludeEventToken: true,
 	CompareEventToken: &querypb.EventToken{
 		Timestamp: 135,

@@ -1,11 +1,11 @@
 package com.youtube.vitess.client;
 
-import com.youtube.vitess.proto.Vtrpc.CallerID;
+import javax.annotation.Nullable;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import javax.annotation.Nullable;
+import com.youtube.vitess.proto.Vtrpc.CallerID;
 
 /**
  * Context is an immutable object that carries per-request info.
@@ -58,6 +58,11 @@ public class Context {
     return new Context(deadline, callerId);
   }
 
+  public Context withIncludeFieldMetadata(boolean includeFieldMetadata) {
+    this.excludeFieldMetadata = includeFieldMetadata;
+    return this;
+  }
+
   @Nullable
   public Instant getDeadline() {
     return deadline;
@@ -71,6 +76,10 @@ public class Context {
     return new Duration(null, deadline);
   }
 
+  public boolean isExcludeFieldMetadata() {
+    return excludeFieldMetadata;
+  }
+
   @Nullable
   public CallerID getCallerId() {
     return callerId;
@@ -78,6 +87,7 @@ public class Context {
 
   private Instant deadline;
   private CallerID callerId;
+  private boolean excludeFieldMetadata;
 
   private Context() {}
 

@@ -1,11 +1,11 @@
 package com.flipkart.vitess.util;
 
-import com.youtube.vitess.proto.Query;
-
 import java.sql.Connection;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.youtube.vitess.proto.Query;
 
 /**
  * Created by ashudeep.sharma on 07/03/16.
@@ -41,41 +41,41 @@ public final class MysqlDefs {
     static final int DELAYED_INSERT = 16;
     static final int DROP_DB = 6;
     static final int FIELD_LIST = 4;
-    static final int FIELD_TYPE_BIT = 16;
-    static final int FIELD_TYPE_DATE = 10;
-    static final int FIELD_TYPE_DATETIME = 12;
+    public static final int FIELD_TYPE_BIT = 16;
+    public static final int FIELD_TYPE_DATE = 10;
+    public static final int FIELD_TYPE_DATETIME = 12;
     // Data Types
-    static final int FIELD_TYPE_DECIMAL = 0;
-    static final int FIELD_TYPE_DOUBLE = 5;
-    static final int FIELD_TYPE_ENUM = 247;
-    static final int FIELD_TYPE_FLOAT = 4;
-    static final int FIELD_TYPE_GEOMETRY = 255;
-    static final int FIELD_TYPE_INT24 = 9;
-    static final int FIELD_TYPE_LONG = 3;
-    static final int FIELD_TYPE_LONG_BLOB = 251;
-    static final int FIELD_TYPE_LONGLONG = 8;
-    static final int FIELD_TYPE_MEDIUM_BLOB = 250;
-    static final int FIELD_TYPE_NEW_DECIMAL = 246;
-    static final int FIELD_TYPE_NEWDATE = 14;
-    static final int FIELD_TYPE_NULL = 6;
-    static final int FIELD_TYPE_SET = 248;
-    static final int FIELD_TYPE_SHORT = 2;
-    static final int FIELD_TYPE_STRING = 254;
-    static final int FIELD_TYPE_TIME = 11;
-    static final int FIELD_TYPE_TIMESTAMP = 7;
-    static final int FIELD_TYPE_TINY = 1;
+    public static final int FIELD_TYPE_DECIMAL = 0;
+    public static final int FIELD_TYPE_DOUBLE = 5;
+    public static final int FIELD_TYPE_ENUM = 247;
+    public static final int FIELD_TYPE_FLOAT = 4;
+    public static final int FIELD_TYPE_GEOMETRY = 255;
+    public static final int FIELD_TYPE_INT24 = 9;
+    public static final int FIELD_TYPE_LONG = 3;
+    public static final int FIELD_TYPE_LONG_BLOB = 251;
+    public static final int FIELD_TYPE_LONGLONG = 8;
+    public static final int FIELD_TYPE_MEDIUM_BLOB = 250;
+    public static final int FIELD_TYPE_NEW_DECIMAL = 246;
+    public static final int FIELD_TYPE_NEWDATE = 14;
+    public static final int FIELD_TYPE_NULL = 6;
+    public static final int FIELD_TYPE_SET = 248;
+    public static final int FIELD_TYPE_SHORT = 2;
+    public static final int FIELD_TYPE_STRING = 254;
+    public static final int FIELD_TYPE_TIME = 11;
+    public static final int FIELD_TYPE_TIMESTAMP = 7;
+    public static final int FIELD_TYPE_TINY = 1;
     // Older data types
-    static final int FIELD_TYPE_TINY_BLOB = 249;
-    static final int FIELD_TYPE_VAR_STRING = 253;
-    static final int FIELD_TYPE_VARCHAR = 15;
+    public static final int FIELD_TYPE_TINY_BLOB = 249;
+    public static final int FIELD_TYPE_VAR_STRING = 253;
+    public static final int FIELD_TYPE_VARCHAR = 15;
     // Newer data types
-    static final int FIELD_TYPE_YEAR = 13;
-    static final int FIELD_TYPE_JSON = 245;
+    public static final int FIELD_TYPE_YEAR = 13;
+    public static final int FIELD_TYPE_JSON = 245;
     static final int INIT_DB = 2;
-    static final long LENGTH_BLOB = 65535;
-    static final long LENGTH_LONGBLOB = 4294967295L;
-    static final long LENGTH_MEDIUMBLOB = 16777215;
-    static final long LENGTH_TINYBLOB = 255;
+    public static final long LENGTH_BLOB = 65535;
+    public static final long LENGTH_LONGBLOB = 4294967295L;
+    public static final long LENGTH_MEDIUMBLOB = 16777215;
+    public static final long LENGTH_TINYBLOB = 255;
     // Limitations
     static final int MAX_ROWS = 50000000; // From the MySQL FAQ
     static final byte OPEN_CURSOR_FLAG = 1;
@@ -103,7 +103,7 @@ public final class MysqlDefs {
     static final int STATISTICS = 9;
 
     static final int TIME = 15;
-    public static Map<Query.Type, Integer> vitesstoMySqlType = new HashMap<Query.Type, Integer>();
+    public static Map<Query.Type, Integer> vitessToJavaType = new HashMap<Query.Type, Integer>();
     public static Map<String, Integer> mysqlConnectionTransactionMapping =
         new HashMap<String, Integer>();
     private static Map<String, Integer> mysqlToJdbcTypesMap = new HashMap<String, Integer>();
@@ -145,35 +145,37 @@ public final class MysqlDefs {
     }
 
     static {
-        vitesstoMySqlType.put(Query.Type.NULL_TYPE, Types.NULL);
-        vitesstoMySqlType.put(Query.Type.INT8, Types.TINYINT);
-        vitesstoMySqlType.put(Query.Type.UINT8, Types.TINYINT);
-        vitesstoMySqlType.put(Query.Type.INT16, Types.SMALLINT);
-        vitesstoMySqlType.put(Query.Type.UINT16, Types.SMALLINT);
-        vitesstoMySqlType.put(Query.Type.INT24, Types.INTEGER);
-        vitesstoMySqlType.put(Query.Type.UINT24, Types.INTEGER);
-        vitesstoMySqlType.put(Query.Type.INT32, Types.INTEGER);
-        vitesstoMySqlType.put(Query.Type.UINT32, Types.INTEGER);
-        vitesstoMySqlType.put(Query.Type.INT64, Types.BIGINT);
-        vitesstoMySqlType.put(Query.Type.UINT64, Types.BIGINT);
-        vitesstoMySqlType.put(Query.Type.FLOAT32, Types.FLOAT);
-        vitesstoMySqlType.put(Query.Type.FLOAT64, Types.DOUBLE);
-        vitesstoMySqlType.put(Query.Type.TIMESTAMP, Types.TIMESTAMP);
-        vitesstoMySqlType.put(Query.Type.DATE, Types.DATE);
-        vitesstoMySqlType.put(Query.Type.TIME, Types.TIME);
-        vitesstoMySqlType.put(Query.Type.DATETIME, Types.TIMESTAMP);
-        vitesstoMySqlType.put(Query.Type.YEAR, Types.SMALLINT);
-        vitesstoMySqlType.put(Query.Type.DECIMAL, Types.DECIMAL);
-        vitesstoMySqlType.put(Query.Type.TEXT, Types.VARCHAR);
-        vitesstoMySqlType.put(Query.Type.BLOB, Types.BLOB);
-        vitesstoMySqlType.put(Query.Type.VARCHAR, Types.VARCHAR);
-        vitesstoMySqlType.put(Query.Type.VARBINARY, Types.VARBINARY);
-        vitesstoMySqlType.put(Query.Type.CHAR, Types.CHAR);
-        vitesstoMySqlType.put(Query.Type.BINARY, Types.BINARY);
-        vitesstoMySqlType.put(Query.Type.BIT, Types.BIT);
-        vitesstoMySqlType.put(Query.Type.ENUM, Types.CHAR);
-        vitesstoMySqlType.put(Query.Type.SET, Types.CHAR);
-        vitesstoMySqlType.put(Query.Type.TUPLE, Types.OTHER);
+        vitessToJavaType.put(Query.Type.NULL_TYPE, Types.NULL);
+        vitessToJavaType.put(Query.Type.INT8, Types.TINYINT);
+        vitessToJavaType.put(Query.Type.UINT8, Types.TINYINT);
+        vitessToJavaType.put(Query.Type.INT16, Types.SMALLINT);
+        vitessToJavaType.put(Query.Type.UINT16, Types.SMALLINT);
+        vitessToJavaType.put(Query.Type.INT24, Types.INTEGER);
+        vitessToJavaType.put(Query.Type.UINT24, Types.INTEGER);
+        vitessToJavaType.put(Query.Type.INT32, Types.INTEGER);
+        vitessToJavaType.put(Query.Type.UINT32, Types.INTEGER);
+        vitessToJavaType.put(Query.Type.INT64, Types.BIGINT);
+        vitessToJavaType.put(Query.Type.UINT64, Types.BIGINT);
+        vitessToJavaType.put(Query.Type.FLOAT32, Types.FLOAT);
+        vitessToJavaType.put(Query.Type.FLOAT64, Types.DOUBLE);
+        vitessToJavaType.put(Query.Type.TIMESTAMP, Types.TIMESTAMP);
+        vitessToJavaType.put(Query.Type.DATE, Types.DATE);
+        vitessToJavaType.put(Query.Type.TIME, Types.TIME);
+        vitessToJavaType.put(Query.Type.DATETIME, Types.TIMESTAMP);
+        vitessToJavaType.put(Query.Type.YEAR, Types.SMALLINT);
+        vitessToJavaType.put(Query.Type.DECIMAL, Types.DECIMAL);
+        vitessToJavaType.put(Query.Type.TEXT, Types.VARCHAR);
+        vitessToJavaType.put(Query.Type.BLOB, Types.BLOB);
+        vitessToJavaType.put(Query.Type.VARCHAR, Types.VARCHAR);
+        vitessToJavaType.put(Query.Type.VARBINARY, Types.VARBINARY);
+        vitessToJavaType.put(Query.Type.CHAR, Types.CHAR);
+        vitessToJavaType.put(Query.Type.BINARY, Types.BINARY);
+        vitessToJavaType.put(Query.Type.BIT, Types.BIT);
+        vitessToJavaType.put(Query.Type.ENUM, Types.CHAR);
+        vitessToJavaType.put(Query.Type.SET, Types.CHAR);
+        vitessToJavaType.put(Query.Type.TUPLE, Types.OTHER);
+        vitessToJavaType.put(Query.Type.GEOMETRY, Types.BINARY);
+        vitessToJavaType.put(Query.Type.JSON, Types.BINARY);
     }
 
     static {

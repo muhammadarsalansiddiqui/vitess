@@ -1,11 +1,12 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessJDBCUrl;
-import com.youtube.vitess.proto.Topodata;
+import java.util.Properties;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Properties;
+import com.flipkart.vitess.jdbc.VitessJDBCUrl;
+import com.youtube.vitess.proto.Topodata;
 
 /**
  * Created by naveen.nahata on 18/02/16.
@@ -145,8 +146,18 @@ public class VitessJDBCUrlTest {
         Assert.assertEquals(15991, vitessJDBCUrl.getHostInfos().get(1).getPort());
         Assert.assertEquals("keyspace", vitessJDBCUrl.getKeyspace());
         Assert.assertEquals("catalog", vitessJDBCUrl.getCatalog());
-        Assert.assertEquals("val1", info.getProperty("prop1"));
-        Assert.assertEquals("val2", info.getProperty("prop2"));
+        Assert.assertEquals("val1", vitessJDBCUrl.getProperties().getProperty("prop1"));
+        Assert.assertEquals("val2", vitessJDBCUrl.getProperties().getProperty("prop2"));
+    }
+
+    @Test public void testLeaveOriginalPropertiesAlone() throws Exception {
+        Properties info = new Properties();
+        VitessJDBCUrl vitessJDBCUrl = new VitessJDBCUrl(
+            "jdbc:vitess://user:pass@hostname1:15991,hostname2:15991/keyspace/catalog?prop1=val1&prop2=val2",
+            info);
+
+        Assert.assertEquals(null, info.getProperty("prop1"));
+        Assert.assertEquals("val1", vitessJDBCUrl.getProperties().getProperty("prop1"));
     }
 
     @Test public void testTwoPCEnabledURL() throws Exception {
@@ -159,7 +170,18 @@ public class VitessJDBCUrlTest {
 
         vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991", null);
         Assert.assertFalse(vitessJDBCUrl.isTwopcEnabled());
+    }
 
+    @Test public void testExcludeFieldMetadataURL() throws Exception {
+        VitessJDBCUrl vitessJDBCUrl =
+            new VitessJDBCUrl("jdbc:vitess://host:15991?excludeFieldMetadata=true", null);
+        Assert.assertTrue(vitessJDBCUrl.isExcludeFieldMetadata());
+
+        vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991?excludeFieldMetadata=false", null);
+        Assert.assertFalse(vitessJDBCUrl.isExcludeFieldMetadata());
+
+        vitessJDBCUrl = new VitessJDBCUrl("jdbc:vitess://host:15991", null);
+        Assert.assertFalse(vitessJDBCUrl.isExcludeFieldMetadata());
     }
 
 }

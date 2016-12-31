@@ -1,5 +1,15 @@
 package com.youtube.vitess.client;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
@@ -103,6 +113,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new SQLFuture<Cursor>(Futures.transformAsync(client.execute(ctx, requestBuilder.build()),
         new AsyncFunction<ExecuteResponse, Cursor>() {
           @Override
@@ -122,6 +136,10 @@ public final class VTGateConn implements Closeable {
             .setTabletType(checkNotNull(tabletType));
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
+    }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
     }
     return new SQLFuture<Cursor>(
         Futures.transformAsync(client.executeShards(ctx, requestBuilder.build()),
@@ -147,6 +165,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new SQLFuture<Cursor>(
         Futures.transformAsync(client.executeKeyspaceIds(ctx, requestBuilder.build()),
             new AsyncFunction<ExecuteKeyspaceIdsResponse, Cursor>() {
@@ -168,6 +190,10 @@ public final class VTGateConn implements Closeable {
         .setTabletType(checkNotNull(tabletType));
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
+    }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
     }
     return new SQLFuture<Cursor>(
         Futures.transformAsync(client.executeKeyRanges(ctx, requestBuilder.build()),
@@ -192,6 +218,10 @@ public final class VTGateConn implements Closeable {
         .setTabletType(checkNotNull(tabletType));
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
+    }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
     }
     return new SQLFuture<Cursor>(
         Futures.transformAsync(client.executeEntityIds(ctx, requestBuilder.build()),
@@ -259,6 +289,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new SQLFuture<List<Cursor>>(
         Futures.transformAsync(client.executeBatchShards(ctx, requestBuilder.build()),
             new AsyncFunction<ExecuteBatchShardsResponse, List<Cursor>>() {
@@ -287,6 +321,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new SQLFuture<List<Cursor>>(
         Futures.transformAsync(client.executeBatchKeyspaceIds(ctx, requestBuilder.build()),
             new AsyncFunction<ExecuteBatchKeyspaceIdsResponse, List<Cursor>>() {
@@ -308,6 +346,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new StreamCursor(client.streamExecute(ctx, requestBuilder.build()));
   }
 
@@ -320,6 +362,10 @@ public final class VTGateConn implements Closeable {
         .setTabletType(checkNotNull(tabletType));
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
+    }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
     }
     return new StreamCursor(client.streamExecuteShards(ctx, requestBuilder.build()));
   }
@@ -336,6 +382,10 @@ public final class VTGateConn implements Closeable {
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
     }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
+    }
     return new StreamCursor(client.streamExecuteKeyspaceIds(ctx, requestBuilder.build()));
   }
 
@@ -348,6 +398,10 @@ public final class VTGateConn implements Closeable {
         .setTabletType(checkNotNull(tabletType));
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
+    }
+    if (ctx.isExcludeFieldMetadata()) {
+      requestBuilder.setOptions(Query.ExecuteOptions.newBuilder()
+          .setExcludeFieldMetadata(ctx.isExcludeFieldMetadata()));
     }
     return new StreamCursor(client.streamExecuteKeyRanges(ctx, requestBuilder.build()));
   }

@@ -1,25 +1,5 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessConnection;
-import com.flipkart.vitess.jdbc.VitessPreparedStatement;
-import com.flipkart.vitess.util.Constants;
-import com.youtube.vitess.client.Context;
-import com.youtube.vitess.client.SQLFuture;
-import com.youtube.vitess.client.VTGateConn;
-import com.youtube.vitess.client.VTGateTx;
-import com.youtube.vitess.client.cursor.Cursor;
-import com.youtube.vitess.client.cursor.CursorWithError;
-import com.youtube.vitess.proto.Query;
-import com.youtube.vitess.proto.Topodata;
-import com.youtube.vitess.proto.Vtrpc;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
@@ -35,6 +15,27 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import com.flipkart.vitess.jdbc.VitessConnection;
+import com.flipkart.vitess.jdbc.VitessPreparedStatement;
+import com.flipkart.vitess.util.Constants;
+import com.youtube.vitess.client.Context;
+import com.youtube.vitess.client.SQLFuture;
+import com.youtube.vitess.client.VTGateConn;
+import com.youtube.vitess.client.VTGateTx;
+import com.youtube.vitess.client.cursor.Cursor;
+import com.youtube.vitess.client.cursor.CursorWithError;
+import com.youtube.vitess.proto.Query;
+import com.youtube.vitess.proto.Topodata;
+import com.youtube.vitess.proto.Vtrpc;
 
 
 /**
@@ -331,7 +332,7 @@ import java.util.TimeZone;
         Cursor mockCursor = PowerMockito.mock(Cursor.class);
         SQLFuture mockSqlFutureCursor = PowerMockito.mock(SQLFuture.class);
         SQLFuture mockSqlFutureVtGateTx = PowerMockito.mock(SQLFuture.class);
-        List<Query.Field> mockFieldList = PowerMockito.mock(ArrayList.class);
+        List<Query.Field> mockFieldList = PowerMockito.spy(new ArrayList<Query.Field>());
 
         PowerMockito.when(mockConn.getKeyspace()).thenReturn("test_keyspace");
         PowerMockito.when(mockConn.getVtGateConn()).thenReturn(mockVtGateConn);
@@ -367,7 +368,8 @@ import java.util.TimeZone;
 
             int fieldSize = 5;
             PowerMockito.when(mockCursor.getFields()).thenReturn(mockFieldList);
-            PowerMockito.when(mockFieldList.size()).thenReturn(fieldSize);
+            PowerMockito.doReturn(fieldSize).when(mockFieldList).size();
+            PowerMockito.doReturn(false).when(mockFieldList).isEmpty();
             boolean hasResultSet = preparedStatement.execute();
             Assert.assertTrue(hasResultSet);
             Assert.assertNotNull(preparedStatement.getResultSet());

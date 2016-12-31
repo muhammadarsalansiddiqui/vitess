@@ -1,5 +1,21 @@
 package com.flipkart.vitess.jdbc.test;
 
+import java.lang.reflect.Field;
+import java.sql.BatchUpdateException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.flipkart.vitess.jdbc.VitessConnection;
 import com.flipkart.vitess.jdbc.VitessStatement;
 import com.flipkart.vitess.util.Constants;
@@ -12,21 +28,6 @@ import com.youtube.vitess.client.cursor.CursorWithError;
 import com.youtube.vitess.proto.Query;
 import com.youtube.vitess.proto.Topodata;
 import com.youtube.vitess.proto.Vtrpc;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.lang.reflect.Field;
-import java.sql.BatchUpdateException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by harshit.gangal on 19/01/16.
@@ -288,7 +289,7 @@ import java.util.List;
         Cursor mockCursor = PowerMockito.mock(Cursor.class);
         SQLFuture mockSqlFutureCursor = PowerMockito.mock(SQLFuture.class);
         SQLFuture mockSqlFutureVtGateTx = PowerMockito.mock(SQLFuture.class);
-        List<Query.Field> mockFieldList = PowerMockito.mock(ArrayList.class);
+        List<Query.Field> mockFieldList = PowerMockito.spy(new ArrayList<Query.Field>());
 
         PowerMockito.when(mockConn.getKeyspace()).thenReturn("test_keyspace");
         PowerMockito.when(mockConn.getVtGateConn()).thenReturn(mockVtGateConn);
@@ -322,7 +323,9 @@ import java.util.List;
 
             int fieldSize = 5;
             PowerMockito.when(mockCursor.getFields()).thenReturn(mockFieldList);
-            PowerMockito.when(mockFieldList.size()).thenReturn(fieldSize);
+            PowerMockito.doReturn(fieldSize).when(mockFieldList).size();
+            PowerMockito.doReturn(false).when(mockFieldList).isEmpty();
+
             boolean hasResultSet = statement.execute(sqlSelect);
             Assert.assertTrue(hasResultSet);
             Assert.assertNotNull(statement.getResultSet());

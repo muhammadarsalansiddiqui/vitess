@@ -1,12 +1,5 @@
 package com.flipkart.vitess.jdbc;
 
-import com.flipkart.vitess.util.CommonUtils;
-import com.flipkart.vitess.util.Constants;
-import com.youtube.vitess.client.Context;
-import com.youtube.vitess.client.RpcClient;
-import com.youtube.vitess.client.VTGateConn;
-import com.youtube.vitess.client.grpc.GrpcClientFactory;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -14,6 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.flipkart.vitess.util.CommonUtils;
+import com.flipkart.vitess.util.Constants;
+import com.youtube.vitess.client.Context;
+import com.youtube.vitess.client.RpcClient;
+import com.youtube.vitess.client.VTGateConn;
+import com.youtube.vitess.client.grpc.GrpcClientFactory;
 
 /**
  * Created by naveen.nahata on 24/02/16.
@@ -45,8 +45,7 @@ public class VitessVTGateManager {
                 synchronized (VitessVTGateManager.class) {
                     if (!vtGateConnHashMap.containsKey(identifier)) {
                         updateVtGateConnHashMap(identifier, hostInfo.getHostname(),
-                            hostInfo.getPort(), vitessJDBCUrl.getUsername(),
-                            vitessJDBCUrl.getKeyspace());
+                            hostInfo.getPort(), vitessJDBCUrl);
                     }
                 }
                 vtGateIdentifiers.add(identifier);
@@ -77,34 +76,17 @@ public class VitessVTGateManager {
      *
      * @param hostname
      * @param port
-     * @param username
+     * @param vitessJDBCUrl
      * @return
      */
-    private static VTGateConn getVtGateConn(String hostname, int port, String username) {
-        Context context = CommonUtils.createContext(username, Constants.CONNECTION_TIMEOUT);
+    private static VTGateConn getVtGateConn(String hostname, int port, VitessJDBCUrl vitessJDBCUrl) {
+        Context context = CommonUtils.createContext(vitessJDBCUrl.getUsername(), vitessJDBCUrl.isExcludeFieldMetadata(), Constants.CONNECTION_TIMEOUT);
         InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname, port);
         RpcClient client = new GrpcClientFactory().create(context, inetSocketAddress);
-        return (new VTGateConn(client));
-    }
-
-    /**
-     * Create vtGateConn object with given identifier.
-     *
-     * @param hostname
-     * @param port
-     * @param username
-     * @param keyspace
-     * @return
-     */
-    private static VTGateConn getVtGateConn(String hostname, int port, String username,
-        String keyspace) {
-        Context context = CommonUtils.createContext(username, Constants.CONNECTION_TIMEOUT);
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname, port);
-        RpcClient client = new GrpcClientFactory().create(context, inetSocketAddress);
-        if (null == keyspace) {
+        if (null == vitessJDBCUrl.getKeyspace()) {
             return (new VTGateConn(client));
         }
-        return (new VTGateConn(client, keyspace));
+        return (new VTGateConn(client, vitessJDBCUrl.getKeyspace()));
     }
 
 
@@ -114,12 +96,10 @@ public class VitessVTGateManager {
      * @param identifier
      * @param hostname
      * @param port
-     * @param username
-     * @param keyspace
      */
     private static void updateVtGateConnHashMap(String identifier, String hostname, int port,
-        String username, String keyspace) {
-        vtGateConnHashMap.put(identifier, getVtGateConn(hostname, port, username, keyspace));
+        VitessJDBCUrl vitessJDBCUrl) {
+        vtGateConnHashMap.put(identifier, getVtGateConn(hostname, port, vitessJDBCUrl));
     }
 
     public static void close() throws SQLException {

@@ -1,20 +1,22 @@
 package com.flipkart.vitess.jdbc.test;
 
-import com.flipkart.vitess.jdbc.VitessConnection;
-import com.flipkart.vitess.util.Constants;
-import com.google.common.util.concurrent.Futures;
-import com.youtube.vitess.client.Context;
-import com.youtube.vitess.client.SQLFuture;
-import com.youtube.vitess.client.VTGateTx;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.flipkart.vitess.jdbc.VitessConnection;
+import com.flipkart.vitess.util.Constants;
+import com.google.common.util.concurrent.Futures;
+import com.youtube.vitess.client.Context;
+import com.youtube.vitess.client.SQLFuture;
+import com.youtube.vitess.client.VTGateTx;
 
 /**
  * Created by harshit.gangal on 19/01/16.
@@ -33,11 +35,11 @@ public class VitessConnectionTest {
     }
 
     private VitessConnection getVitessConnection() throws SQLException {
-        return new VitessConnection(dbURL, null);
+        return new VitessConnection(dbURL, new Properties());
     }
 
     @Test public void testVitessConnection() throws SQLException {
-        VitessConnection vitessConnection = new VitessConnection(dbURL, null);
+        VitessConnection vitessConnection = new VitessConnection(dbURL, new Properties());
         Assert.assertEquals(false, vitessConnection.isClosed());
         Assert.assertNull(vitessConnection.getDbProperties());
     }

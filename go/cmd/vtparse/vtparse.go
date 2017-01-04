@@ -28,11 +28,18 @@ import (
 	"bytes"
 	"strings"
 	"github.com/youtube/vitess/go/vt/servenv"
+	"io"
 )
 
 var (
 	tailBytes = flag.Int64("tailBytes", 10000, "bytes to parse of input file, starting at the end")
 	waitTime = flag.Duration("wait-time", 1*time.Minute, "time to wait while parsing lines")
+	cell = flag.String("cell", "", "cell to execute against")
+	keyspace = flag.String("keyspace", "", "keyspace to execute against")
+	ignored_error_patterns = []*regexp.Regexp {
+		regexp.MustCompile("keyspace \\w+ not found in vschema"),
+		regexp.MustCompile("symbol @@[\\w.]+ not found"),
+	}
 )
 
 func main() {
@@ -58,7 +65,6 @@ func main() {
 		log.Errorf("vtparse requires an input_file positional argument")
 		exit.Return(1)
 	}
-
 	servenv.FireRunHooks()
 
 	ts := topo.Open()
@@ -68,7 +74,7 @@ func main() {
 	wr := wrangler.New(logutil.NewConsoleLogger(), ts, tmclient.NewTabletManagerClient())
 	installSignalHandlers(cancel)
 
-	srv, err := wr.TopoServer().GetSrvVSchema(ctx, "")
+	srv, err := wr.TopoServer().GetSrvVSchema(ctx, *cell)
 	exitOnError(err, "get wrangler")
 	vs, err := vindexes.BuildVSchema(srv)
 	exitOnError(err, "build vschema")
@@ -79,26 +85,50 @@ func main() {
 
 	scanner := bufio.NewScanner(in)
 
-	re := regexp.MustCompile("(	?:\\d{4}-\\d{2}\\d{2}T\\d{2}:\\d{2}:\\d{2}:\\d{6}Z\\d*)(?:\\s+\\d+)?\\s+(\\w+)\\t*(?:(.+))?$")
+	re := regexp.MustCompile("(?:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z\\d*)(?:\\s+\\d+)?\\s+(\\w+)\\t*(?:(.+))?$")
 
 	var buffer bytes.Buffer
+	started := false
+
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		matches := re.FindStringSubmatch(line)
 		if matches != nil {
+			started = true
+			if matches[1] != "Query" {
+				continue
+			}
+
 			if buffer.Len() > 0 {
-				tryParse(string(buffer.Bytes()), vs)
+				sql := string(buffer.Bytes())
+				if !ignored(sql) {
+					fmt.Fprintf(os.Stderr, "Trying to parse: %s\n", sql)
+					tryParse(sql, vs)
+				}
 				buffer.Reset()
 			}
-			buffer.WriteString(matches[0])
-		} else {
-			buffer.WriteString(strings.TrimSpace(line))
+			buffer.WriteString(matches[2])
+		} else if started {
+			fmt.Fprintln(os.Stderr, "No match\n")
+			buffer.WriteString(" " + strings.TrimSpace(line) + " ")
 		}
 	}
-
-	log.Info("Finished")
+	exitOnError(scanner.Err(), "scanner error")
+	fmt.Fprintln(os.Stderr, "Finished")
 	exit.Return(0)
+}
+
+func ignored(sql string) bool {
+	sql = strings.ToLower(sql)
+	return strings.HasPrefix(sql, "set ") ||
+		strings.HasPrefix(sql, "use ") ||
+		strings.HasPrefix(sql, "show ") ||
+		strings.HasPrefix(sql, "begin") ||
+		strings.HasPrefix(sql, "commit") ||
+		strings.Contains(sql, "memory_global_by_current_bytes") ||
+		strings.Contains(sql, "heartbeat.heartbeat") ||
+		strings.Contains(sql, "`heartbeat`.`heartbeat`")
 }
 
 func exitOnError(err error, msg string, args ...interface{}) {
@@ -113,21 +143,42 @@ func exitOnError(err error, msg string, args ...interface{}) {
 
 func openToLoc(fileName string) (*os.File, error){
 	in, err := os.Open(fileName)
-	_, err = in.Seek(*tailBytes, 2)
-
+	_, err = in.Seek((*tailBytes) * -1, io.SeekEnd)
 	return in, err
 }
 
 func tryParse(sql string, vs *vindexes.VSchema) {
-	plan, err  := planbuilder.Build(sql, &wrappedVSchema{
+	plan, err := planbuilder.Build(sql, &wrappedVSchema{
 		vschema:  vs,
-		keyspace: sqlparser.NewTableIdent(""),
+		keyspace: sqlparser.NewTableIdent(*keyspace),
 	})
+
+	if err != nil && errIsIgnored(err) {
+		return
+	}
+
 	exitOnError(err, "query=%v", sql)
 
 	route, _ := plan.Instructions.(*engine.Route)
-	log.Infof(route.FieldQuery)
-	log.Infof(route.Query)
+	fmt.Fprintf(os.Stderr, "Original: %s\n", sql)
+	fmt.Fprintf(os.Stderr, "Parsed: %s\n", route.Query)
+	fmt.Fprintf(os.Stderr, "Field: %s\n",route.FieldQuery)
+
+}
+
+func errIsIgnored(err error) bool {
+	if err == nil {
+		return true
+	}
+
+	for _, pattern := range ignored_error_patterns {
+		match := pattern.MatchString(err.Error())
+		if match {
+			return true
+		}
+	}
+
+	return false
 }
 
 type wrappedVSchema struct {

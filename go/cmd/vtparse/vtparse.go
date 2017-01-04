@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"bytes"
 	"strings"
+	"github.com/youtube/vitess/go/vt/servenv"
 )
 
 var (
@@ -57,6 +58,8 @@ func main() {
 		log.Errorf("vtparse requires an input_file positional argument")
 		exit.Return(1)
 	}
+
+	servenv.FireRunHooks()
 
 	ts := topo.Open()
 	defer ts.Close()

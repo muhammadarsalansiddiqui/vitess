@@ -41,6 +41,7 @@ var (
 	conn_user = flag.String("parse-conn-user", "root", "User to connect to db, i.e. root")
 	conn_password = flag.String("parse-conn-password", "", "Password to connect to db")
 	conn_host = flag.String("parse-conn-host", "localhost:3306", "Host and port to connect to db, i.e. localhost:3306")
+	conn_socket = flag.String("parse-conn-socket", "", "Unix socket file to connect on, i.e. /var/run/mysql.sock")
 	conn_file = flag.String("parse-conn-file", "", "Path to file containing connect info for db. Should contain at least one each of user=,host=,password=, on separate lines")
 
 	ignored_error_patterns = []*regexp.Regexp {
@@ -104,7 +105,16 @@ func main() {
 	if val, ok := creds["password"]; ok && len(val) > 0 {
 		creds["password"] = fmt.Sprintf(":%s", creds["password"])
 	}
-	db, err := sql.Open("mysql", fmt.Sprintf("%s%s@tcp(%s)/%s", creds["user"], creds["password"], creds["host"], *keyspace))
+
+	var address string
+	if val, ok := creds["socket"]; ok && len(val) > 0 {
+		address = fmt.Sprintf("unix(%s)", creds["socket"])
+	} else if val, ok := creds["host"]; ok && len(val) > 0 {
+		address = fmt.Sprintf("tcp(%s)", creds["host"])
+	} else {
+		panic("Need to specify either socket or host, through -parse-conn-host, -parse-conn-socket, or -parse-conn-file")
+	}
+	db, err := sql.Open("mysql", fmt.Sprintf("%s%s@%s/%s", creds["user"], creds["password"], address, *keyspace))
 	defer db.Close()
 
 	err = db.Ping()
@@ -151,6 +161,7 @@ func getCredentials() (map[string]string) {
 	creds["user"] = *conn_user
 	creds["password"] = *conn_password
 	creds["host"] = *conn_host
+	creds["socket"] = *conn_socket
 
 	if conn_file != nil && len(*conn_file) > 0 {
 		cin, cerr := os.Open(*conn_file)

@@ -34,8 +34,8 @@ import (
 var (
 	tailBytes = flag.Int64("tailBytes", 10000, "bytes to parse of input file, starting at the end")
 	waitTime = flag.Duration("wait-time", 1*time.Minute, "time to wait while parsing lines")
-	cell = flag.String("cell", "", "cell to execute against")
-	keyspace = flag.String("keyspace", "", "keyspace to execute against")
+	cell = flag.String("parse-cell", "", "cell to execute against")
+	keyspace = flag.String("parse-keyspace", "", "keyspace to execute against")
 	ignored_error_patterns = []*regexp.Regexp {
 		regexp.MustCompile("keyspace \\w+ not found in vschema"),
 		regexp.MustCompile("symbol @@[\\w.]+ not found"),

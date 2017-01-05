@@ -458,6 +458,38 @@ func (node Comments) WalkSubtree(visit Visit) error {
 	return nil
 }
 
+// DeleteExprs represents multi-table DELETE expressions
+type DeleteExprs []DeleteExpr
+
+// Format formats the node.
+func (node DeleteExprs) Format(buf *TrackedBuffer) {
+	var prefix string
+	for _, n := range node {
+		buf.Myprintf("%s%v", prefix, n)
+		prefix = ", "
+	}
+}
+
+// WalkSubtree walks the nodes of the subtree.
+func (node DeleteExprs) WalkSubtree(visit Visit) error {
+	for _, n := range node {
+		if err := Walk(visit, n); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// SelectExpr represents a SELECT expression.
+type DeleteExpr interface {
+	iDeleteExpr()
+	SQLNode
+}
+
+func (*StarExpr) iDeleteExpr()    {}
+func (*NonStarExpr) iDeleteExpr() {}
+
+
 // SelectExprs represents SELECT expressions.
 type SelectExprs []SelectExpr
 

@@ -39,6 +39,8 @@ func forceEOF(yylex interface{}) {
   bytes       []byte
   bytes2      [][]byte
   str         string
+  deleteExprs DeleteExprs
+  deleteExpr  DeleteExpr
   selectExprs SelectExprs
   selectExpr  SelectExpr
   columns     Columns
@@ -125,6 +127,8 @@ func forceEOF(yylex interface{}) {
 %type <bytes2> comment_opt comment_list
 %type <str> union_op
 %type <str> distinct_opt straight_join_opt
+%type <deleteExprs> delete_expression_list
+%type <deleteExpr> delete_expression
 %type <selectExprs> select_expression_list
 %type <selectExpr> select_expression
 %type <expr> expression
@@ -238,6 +242,14 @@ delete_statement:
   DELETE comment_opt FROM table_name where_expression_opt order_by_opt limit_opt
   {
     $$ = &Delete{Comments: Comments($2), Table: $4, Where: NewWhere(WhereStr, $5), OrderBy: $6, Limit: $7}
+  }
+| DELETE comment_opt delete_expression_list FROM table_references where_expression_opt
+  {
+    $$ = &Delete{Comments: Comments($2), DeleteExprs: $3, From: $5, Where: NewWhere(WhereStr, $6)}
+  }
+| DELETE comment_opt FROM delete_expression_list USING table_references where_expression_opt
+  {
+    $$ = &Delete{Comments: Comments($2), DeleteExprs: $4, From: $6, Where: NewWhere(WhereStr, $7)}
   }
 
 set_statement:
@@ -374,6 +386,26 @@ straight_join_opt:
 | STRAIGHT_JOIN
   {
     $$ = StraightJoinHint
+  }
+
+delete_expression_list:
+  delete_expression
+  {
+    $$ = DeleteExprs{$1}
+  }
+| delete_expression_list ',' delete_expression
+  {
+    $$ = append($$, $3)
+  }
+
+delete_expression:
+  table_id
+  {
+    $$ = &NonStarExpr{Expr: $1}
+  }
+| table_id '.' '*'
+  {
+    $$ = &StarExpr{TableName: &TableName{Name: $1}}
   }
 
 select_expression_list:

@@ -255,14 +255,15 @@ func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) {
 	}
 
 	exitOnError(err, "parse query=%v", sql)
-	source := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", sql)))
 
 	route, _ := plan.Instructions.(*engine.Route)
 	fmt.Fprintf(os.Stderr, "Original: %s\n", sql)
 	fmt.Fprintf(os.Stderr, "Parsed: %s\n", route.Query)
 	fmt.Fprintf(os.Stderr, "Field: %s\n",route.FieldQuery)
 
+	source := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", sql)))
 	comp := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.Query)))
+	
 	if !reflect.DeepEqual(source, comp) {
 		fmt.Fprintf(os.Stderr, "original explain: %v\n,parsed explain: %v", source, comp)
 		panic("Explains not equal")

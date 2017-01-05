@@ -31,6 +31,7 @@ import (
 	"io"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"reflect"
 )
 
 var (
@@ -182,6 +183,9 @@ func getCredentials() (map[string]string) {
 	// account for possibly quoted values
 	re := regexp.MustCompile("'|\"")
 	for key, value := range creds {
+		if len(value) == 0 {
+			continue
+		}
 		if re.MatchString(string(value[0])) && value[0] == value[len(value) - 1] {
 			creds[key] = value[1:len(value)-1]
 
@@ -251,19 +255,61 @@ func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) {
 	}
 
 	exitOnError(err, "parse query=%v", sql)
+	source := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", sql)))
 
 	route, _ := plan.Instructions.(*engine.Route)
-	_, err = db.Query(fmt.Sprintf("EXPLAIN %s", route.Query))
-	exitOnError(err, "explain parsed=%s", sql)
-	_, err = db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery))
-	exitOnError(err, "explain field=%s", sql)
-
 	fmt.Fprintf(os.Stderr, "Original: %s\n", sql)
 	fmt.Fprintf(os.Stderr, "Parsed: %s\n", route.Query)
 	fmt.Fprintf(os.Stderr, "Field: %s\n",route.FieldQuery)
 
+	comp := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.Query)))
+	if !reflect.DeepEqual(source, comp) {
+		fmt.Fprintf(os.Stderr, "original explain: %v\n,parsed explain: %v", source, comp)
+		panic("Explains not equal")
+	}
+
+	field := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery)))
+	if len(field) != 1 || !field[0].extra.Valid || strings.ToLower(field[0].extra.String) != "impossible where" {
+		fmt.Fprintf(os.Stderr, "field explain: %v", field)
+		panic("FieldQuery not simple Impossible WHERE")
+	}
+
+	exitOnError(err, "explain field=%s", sql)
+
 	query_cache[sql] = true
 
+}
+
+type explainResult struct {
+	id sql.NullInt64
+	selectType sql.NullString
+	table sql.NullString
+	partitions  sql.NullString
+	_type sql.NullString
+	possible_keys sql.NullString
+	key sql.NullString
+	key_len sql.NullInt64
+	ref sql.NullString
+	rows sql.NullInt64
+	filtered sql.NullString
+	extra sql.NullString
+}
+
+func parseRows(rows *sql.Rows, err error) []explainResult {
+	exitOnError(err, "executing query")
+	all := []explainResult{}
+
+	count := 0
+	for rows.Next() {
+		parsed := explainResult{}
+		err := rows.Scan(&parsed.id, &parsed.selectType, &parsed.table, &parsed.partitions, &parsed._type, &parsed.possible_keys, &parsed.key, &parsed.key_len, &parsed.ref, &parsed.rows, &parsed.filtered, &parsed.extra)
+		count++
+		exitOnError(err, "parsing row %d", count)
+		all = append(all, parsed)
+
+	}
+
+	return all
 }
 
 func errIsIgnored(err error) bool {

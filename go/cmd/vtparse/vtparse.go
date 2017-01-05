@@ -38,7 +38,10 @@ var (
 	waitTime = flag.Duration("wait-time", 1*time.Minute, "time to wait while parsing lines")
 	cell = flag.String("parse-cell", "", "cell to execute against")
 	keyspace = flag.String("parse-keyspace", "", "keyspace to execute against")
-	creds = flag.String("parse-creds", "root", "Credential string to connect to db, i.e. user:password")
+	conn_user = flag.String("parse-conn-user", "root", "User to connect to db, i.e. root")
+	conn_password = flag.String("parse-conn-password", "", "Password to connect to db")
+	conn_host = flag.String("parse-conn-host", "localhost:3306", "Host and port to connect to db, i.e. localhost:3306")
+	conn_file = flag.String("parse-conn-file", "", "Path to file containing connect info for db. Should contain at least one each of user=,host=,password=, on separate lines")
 
 	ignored_error_patterns = []*regexp.Regexp {
 		regexp.MustCompile("keyspace \\w+ not found in vschema"),
@@ -96,7 +99,12 @@ func main() {
 	var buffer bytes.Buffer
 	started := false
 
-	db, err := sql.Open("mysql", fmt.Sprintf("%s@tcp(localhost:3306)/%s", *creds, *keyspace))
+	creds := getCredentials()
+	// simplify format string below by prepending :
+	if val, ok := creds["password"]; ok && len(val) > 0 {
+		creds["password"] = fmt.Sprintf(":%s", creds["password"])
+	}
+	db, err := sql.Open("mysql", fmt.Sprintf("%s%s@tcp(%s)/%s", creds["user"], creds["password"], creds["host"], *keyspace))
 	defer db.Close()
 
 	err = db.Ping()
@@ -136,6 +144,46 @@ func main() {
 	exitOnError(scanner.Err(), "scanner error")
 	fmt.Fprintf(os.Stderr, "Finished. Ignored %d queries, parsed %d\n", len(ignore_cache), len(query_cache))
 	exit.Return(0)
+}
+
+func getCredentials() (map[string]string) {
+	creds := make(map[string]string)
+	creds["user"] = *conn_user
+	creds["password"] = *conn_password
+	creds["host"] = *conn_host
+
+	if conn_file != nil && len(*conn_file) > 0 {
+		cin, cerr := os.Open(*conn_file)
+		exitOnError(cerr, "open conn file: %s", *conn_file)
+		cscanner := bufio.NewScanner(cin)
+
+		re := regexp.MustCompile("(^[^=]+)=(.+)$")
+		for cscanner.Scan() {
+			line := cscanner.Text()
+			matches := re.FindStringSubmatch(line)
+			if matches != nil && len(matches) == 3 {
+				creds[matches[1]] = matches[2]
+			}
+		}
+
+	}
+
+	// account for possibly quoted values
+	re := regexp.MustCompile("'|\"")
+	for key, value := range creds {
+		if re.MatchString(string(value[0])) && value[0] == value[len(value) - 1] {
+			creds[key] = value[1:len(value)-1]
+
+		}
+	}
+
+	// Default port
+	re = regexp.MustCompile(":\\d+$")
+	if !re.MatchString(creds["host"]) {
+		creds["host"] = fmt.Sprintf("%s:3306", creds["host"])
+	}
+
+	return creds
 }
 
 func ignored(sql string) bool {

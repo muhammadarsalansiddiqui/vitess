@@ -48,6 +48,7 @@ var (
 	ignored_error_patterns = []*regexp.Regexp {
 		regexp.MustCompile("keyspace \\w+ not found in vschema"),
 		regexp.MustCompile("symbol @@[\\w.]+ not found"),
+		regexp.MustCompile("Table '\\w+\\.\\w+' doesn't exist"),
 	}
 	query_cache = make(map[string]bool)
 	ignore_cache = make(map[string]bool)
@@ -259,26 +260,29 @@ func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) {
 	route, _ := plan.Instructions.(*engine.Route)
 	fmt.Fprintf(os.Stderr, "Original: %s\n", sql)
 	fmt.Fprintf(os.Stderr, "Parsed: %s\n", route.Query)
-	fmt.Fprintf(os.Stderr, "Field: %s\n",route.FieldQuery)
+	fmt.Fprintf(os.Stderr, "Field: %s\n", route.FieldQuery)
 
-	source := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", sql)))
-	comp := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.Query)))
+	res, err := db.Query(fmt.Sprintf("EXPLAIN %s", sql))
+	if err == nil || !errIsIgnored(err) {
+		source := parseRows(res, err)
+		comp := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.Query)))
 
-	if !reflect.DeepEqual(source, comp) {
-		fmt.Fprintf(os.Stderr, "original explain: %v\n,parsed explain: %v", source, comp)
-		panic("Explains not equal")
-	}
-
-	if len(route.FieldQuery) > 0 {
-		fields := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery)))
-		for _, field := range fields {
-			if !field.extra.Valid || strings.ToLower(field.extra.String) != "impossible where" {
-				fmt.Fprintf(os.Stderr, "field explain: %v", field)
-				panic("FieldQuery not simple Impossible WHERE")
-			}
+		if !reflect.DeepEqual(source, comp) {
+			fmt.Fprintf(os.Stderr, "original explain: %v\n,parsed explain: %v", source, comp)
+			panic("Explains not equal")
 		}
-	} else if re := regexp.MustCompile("(?i)^\\s*INSERT|UPDATE|DELETE|SHOW|EXPLAIN|ALTER|DROP|CREATE"); !re.MatchString(sql) {
-		panic("query should have a field query, but doesn't")
+
+		if len(route.FieldQuery) > 0 {
+			fields := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery)))
+			for _, field := range fields {
+				if !field.extra.Valid || strings.ToLower(field.extra.String) != "impossible where" {
+					fmt.Fprintf(os.Stderr, "field explain: %v", field)
+					panic("FieldQuery not simple Impossible WHERE")
+				}
+			}
+		} else if re := regexp.MustCompile("(?i)^\\s*INSERT|UPDATE|DELETE|SHOW|EXPLAIN|ALTER|DROP|CREATE"); !re.MatchString(sql) {
+			panic("query should have a field query, but doesn't")
+		}
 	}
 
 	query_cache[sql] = true

@@ -268,11 +268,14 @@ func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) {
 		panic("Explains not equal")
 	}
 
-	field := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery)))
-	if len(field) != 1 || !field[0].extra.Valid || strings.ToLower(field[0].extra.String) != "impossible where" {
-		fmt.Fprintf(os.Stderr, "field explain: %v", field)
-		panic("FieldQuery not simple Impossible WHERE")
+	fields := parseRows(db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery)))
+	for _, field := range fields {
+		if !field.extra.Valid || strings.ToLower(field.extra.String) != "impossible where" {
+			fmt.Fprintf(os.Stderr, "field explain: %v", field)
+			panic("FieldQuery not simple Impossible WHERE")
+		}
 	}
+
 
 	exitOnError(err, "explain field=%s", sql)
 

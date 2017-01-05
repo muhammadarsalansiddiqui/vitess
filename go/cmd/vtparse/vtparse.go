@@ -29,6 +29,8 @@ import (
 	"strings"
 	"github.com/youtube/vitess/go/vt/servenv"
 	"io"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -36,10 +38,14 @@ var (
 	waitTime = flag.Duration("wait-time", 1*time.Minute, "time to wait while parsing lines")
 	cell = flag.String("parse-cell", "", "cell to execute against")
 	keyspace = flag.String("parse-keyspace", "", "keyspace to execute against")
+	creds = flag.String("parse-creds", "root", "Credential string to connect to db, i.e. user:password")
+
 	ignored_error_patterns = []*regexp.Regexp {
 		regexp.MustCompile("keyspace \\w+ not found in vschema"),
 		regexp.MustCompile("symbol @@[\\w.]+ not found"),
 	}
+	query_cache = make(map[string]bool)
+	ignore_cache = make(map[string]bool)
 )
 
 func main() {
@@ -85,50 +91,73 @@ func main() {
 
 	scanner := bufio.NewScanner(in)
 
-	re := regexp.MustCompile("(?:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z\\d*)(?:\\s+\\d+)?\\s+(\\w+)\\t*(?:(.+))?$")
+	line_re := regexp.MustCompile("(?:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z\\d*)(?:\\s+\\d+)?\\s+(\\w+)\\t*(?:(.+))?$")
 
 	var buffer bytes.Buffer
 	started := false
 
+	db, err := sql.Open("mysql", fmt.Sprintf("%s@tcp(localhost:3306)/%s", *creds, *keyspace))
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		matches := re.FindStringSubmatch(line)
+		matches := line_re.FindStringSubmatch(line)
 		if matches != nil {
 			started = true
 			if matches[1] != "Query" {
 				continue
 			}
 
+			if strings.Contains(matches[2], "FLUSH LOCAL LOGS") {
+				scanner.Scan()
+				scanner.Scan()
+				scanner.Scan()
+				continue
+			}
+
 			if buffer.Len() > 0 {
 				sql := string(buffer.Bytes())
 				if !ignored(sql) {
-					fmt.Fprintf(os.Stderr, "Trying to parse: %s\n", sql)
-					tryParse(sql, vs)
+					tryParse(sql, vs, db)
 				}
 				buffer.Reset()
 			}
 			buffer.WriteString(matches[2])
 		} else if started {
-			fmt.Fprintln(os.Stderr, "No match\n")
 			buffer.WriteString(" " + strings.TrimSpace(line) + " ")
 		}
 	}
 	exitOnError(scanner.Err(), "scanner error")
-	fmt.Fprintln(os.Stderr, "Finished")
+	fmt.Fprintf(os.Stderr, "Finished. Ignored %d queries, parsed %d\n", len(ignore_cache), len(query_cache))
 	exit.Return(0)
 }
 
 func ignored(sql string) bool {
-	sql = strings.ToLower(sql)
-	return strings.HasPrefix(sql, "set ") ||
+	if ignored, ok := ignore_cache[sql]; ok {
+		return ignored
+	}
+
+	sql = strings.TrimSpace(strings.ToLower(sql))
+	should_ignore := strings.HasPrefix(sql, "set ") ||
 		strings.HasPrefix(sql, "use ") ||
 		strings.HasPrefix(sql, "show ") ||
 		strings.HasPrefix(sql, "begin") ||
 		strings.HasPrefix(sql, "commit") ||
+		strings.HasPrefix(sql, "explain") ||
 		strings.Contains(sql, "memory_global_by_current_bytes") ||
 		strings.Contains(sql, "heartbeat.heartbeat") ||
 		strings.Contains(sql, "`heartbeat`.`heartbeat`")
+
+
+	ignore_cache[sql] = should_ignore
+
+	return should_ignore
 }
 
 func exitOnError(err error, msg string, args ...interface{}) {
@@ -147,22 +176,34 @@ func openToLoc(fileName string) (*os.File, error){
 	return in, err
 }
 
-func tryParse(sql string, vs *vindexes.VSchema) {
+func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) {
+	if _, ok := query_cache[sql]; ok {
+		return
+	}
+
 	plan, err := planbuilder.Build(sql, &wrappedVSchema{
 		vschema:  vs,
 		keyspace: sqlparser.NewTableIdent(*keyspace),
 	})
 
 	if err != nil && errIsIgnored(err) {
+		query_cache[sql] = false
 		return
 	}
 
-	exitOnError(err, "query=%v", sql)
+	exitOnError(err, "parse query=%v", sql)
 
 	route, _ := plan.Instructions.(*engine.Route)
+	_, err = db.Query(fmt.Sprintf("EXPLAIN %s", route.Query))
+	exitOnError(err, "explain parsed=%s", sql)
+	_, err = db.Query(fmt.Sprintf("EXPLAIN %s", route.FieldQuery))
+	exitOnError(err, "explain field=%s", sql)
+
 	fmt.Fprintf(os.Stderr, "Original: %s\n", sql)
 	fmt.Fprintf(os.Stderr, "Parsed: %s\n", route.Query)
 	fmt.Fprintf(os.Stderr, "Field: %s\n",route.FieldQuery)
+
+	query_cache[sql] = true
 
 }
 

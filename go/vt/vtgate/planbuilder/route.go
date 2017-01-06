@@ -27,7 +27,7 @@ type route struct {
 	IsRHS bool
 	// Select is the AST for the query fragment that will be
 	// executed by this route.
-	Select sqlparser.Select
+	Select sqlparser.Statement
 	order  int
 	symtab *symtab
 	// Colsyms represent the columns returned by this route.

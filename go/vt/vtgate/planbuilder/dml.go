@@ -99,6 +99,52 @@ func buildDeletePlan(del *sqlparser.Delete, vschema VSchema) (*engine.Route, err
 	return route, nil
 }
 
+func buildDeleteMultiPlan(del *sqlparser.DeleteMulti, vschema VSchema) (primitive engine.Primitive, err error) {
+	//route := &engine.Route{
+	//	Query: generateQuery(del),
+	//}
+	bldr, err := processTableExprs(del.From, vschema)
+	if err != nil {
+		return nil, err
+	}
+	if del.Where != nil {
+		err = pushFilter(del.Where.Expr, bldr, sqlparser.WhereStr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = pushDeleteExprs(del, bldr)
+	if err != nil {
+		return nil, err
+	}
+
+	return bldr.Primitive(), nil
+}
+
+// pushSelectExprs identifies the target route for the
+// select expressions and pushes them down.
+func pushDeleteExprs(del *sqlparser.DeleteMulti, bldr builder) error {
+	err := checkAggregates(sel, bldr)
+	if err != nil {
+		return err
+	}
+	if sel.Distinct != "" {
+		// We know it's a route, but this may change
+		// in the distant future.
+		bldr.(*route).MakeDistinct()
+	}
+	colsyms, err := pushSelectRoutes(sel.SelectExprs, bldr)
+	if err != nil {
+		return err
+	}
+	bldr.Symtab().Colsyms = colsyms
+	err = pushGroupBy(sel.GroupBy, bldr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // generateDeleteSubquery generates the query to fetch the rows
 // that will be deleted. This allows VTGate to clean up any
 // owned vindexes as needed.

@@ -245,11 +245,11 @@ delete_statement:
   }
 | DELETE comment_opt delete_expression_list FROM table_references where_expression_opt
   {
-    $$ = &Delete{Comments: Comments($2), DeleteExprs: $3, From: $5, Where: NewWhere(WhereStr, $6)}
+    $$ = &DeleteMulti{Comments: Comments($2), DeleteExprs: $3, From: $5, Where: NewWhere(WhereStr, $6), Using: false}
   }
 | DELETE comment_opt FROM delete_expression_list USING table_references where_expression_opt
   {
-    $$ = &Delete{Comments: Comments($2), DeleteExprs: $4, From: $6, Where: NewWhere(WhereStr, $7)}
+    $$ = &DeleteMulti{Comments: Comments($2), DeleteExprs: $4, From: $6, Where: NewWhere(WhereStr, $7), Using: true}
   }
 
 set_statement:
@@ -401,11 +401,15 @@ delete_expression_list:
 delete_expression:
   table_id
   {
-    $$ = &NonStarExpr{Expr: $1}
+    $$ = &TableName{Name: $1}
   }
 | table_id '.' '*'
   {
     $$ = &StarExpr{TableName: &TableName{Name: $1}}
+  }
+| table_id '.' table_id '.' '*'
+  {
+    $$ = &StarExpr{TableName: &TableName{Qualifier: $1, Name: $3}}
   }
 
 select_expression_list:

@@ -106,6 +106,7 @@ func (*Select) iStatement() {}
 func (*Insert) iStatement() {}
 func (*Update) iStatement() {}
 func (*Delete) iStatement() {}
+func (*DeleteMulti) iStatement() {}
 func (*Set) iStatement()    {}
 func (*DDL) iStatement()    {}
 func (*Other) iStatement()  {}
@@ -357,6 +358,41 @@ func (node *Delete) WalkSubtree(visit Visit) error {
 	)
 }
 
+type DeleteMulti struct {
+	Comments    Comments
+	DeleteExprs DeleteExprs
+	From        TableExprs
+	Where       *Where
+	Using       bool
+}
+
+// Format formats the node.
+func (node *DeleteMulti) Format(buf *TrackedBuffer) {
+	if node.Using {
+		buf.Myprintf("delete %vfrom using%v%v",
+			node.Comments, node.From,
+			node.DeleteExprs, node.Where)
+	} else {
+		buf.Myprintf("delete %v%vfrom %v%v",
+			node.Comments, node.DeleteExprs,
+			node.From, node.Where)
+	}
+}
+
+// WalkSubtree walks the nodes of the subtree.
+func (node *DeleteMulti) WalkSubtree(visit Visit) error {
+	if node == nil {
+		return nil
+	}
+	return Walk(
+		visit,
+		node.Comments,
+		node.DeleteExprs,
+		node.From,
+		node.Where,
+	)
+}
+
 // Set represents a SET statement.
 type Set struct {
 	Comments Comments
@@ -487,7 +523,7 @@ type DeleteExpr interface {
 }
 
 func (*StarExpr) iDeleteExpr()    {}
-func (*NonStarExpr) iDeleteExpr() {}
+func (*TableName) iDeleteExpr() {}
 
 
 // SelectExprs represents SELECT expressions.

@@ -8,6 +8,10 @@ if [ -z "$GIT_DIR" ]; then
   DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
   GIT_DIR="${DIR}/.."
 fi
-for hook in $GIT_DIR/../misc/git/hooks/*; do
-  $hook
-done
+
+MISC_DIR="$GIT_DIR/../misc"
+if [ -d "$MISC_DIR" ]; then
+  for hook in $MISC_DIR/git/hooks/*; do
+    $hook
+  done
+fi

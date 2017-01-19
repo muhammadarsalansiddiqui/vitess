@@ -3,6 +3,7 @@ package com.flipkart.vitess.jdbc;
 import com.flipkart.vitess.util.Constants;
 import com.flipkart.vitess.util.MysqlDefs;
 import com.flipkart.vitess.util.StringUtils;
+import com.flipkart.vitess.util.charset.CharsetMapping;
 import com.youtube.vitess.proto.Query;
 
 import java.sql.SQLException;
@@ -14,6 +15,7 @@ public class FieldWithMetadata {
     private final VitessConnection connection;
     private final Query.Field field;
     private final Query.Type vitessType;
+    private final boolean isImplicitTempTable;
     private final boolean isSingleBit;
     private final int precisionAdjustFactor;
 
@@ -43,6 +45,36 @@ public class FieldWithMetadata {
         // All of the below remapping and metadata fields require the extra
         // fields included when includeFields=IncludedFields.ALL
         if (connection.isIncludeAllFields()) {
+            this.isImplicitTempTable = field.getTable().length() > 5 && field.getTable().startsWith("#sql_");
+
+            // Re-map  BLOB to 'real' blob type
+            if (this.javaType == Types.BLOB) {
+                boolean isFromFunction = field.getOrgTable().isEmpty();
+                if (connection.getBlobsAreStrings() || (connection.getFunctionsNeverReturnBlobs() && isFromFunction)) {
+                    this.javaType = Types.VARCHAR;
+                } else if (collationIndex == CharsetMapping.MYSQL_COLLATION_INDEX_binary) {
+                    if (connection.getUseBlobToStoreUTF8OutsideBMP() && shouldSetupForUtf8StringInBlob()) {
+                        if (this.getColumnLength() == MysqlDefs.LENGTH_TINYBLOB || this.getColumnLength() == MysqlDefs.LENGTH_BLOB) {
+                            this.javaType = Types.VARCHAR;
+                        } else {
+                            this.javaType = Types.LONGVARCHAR;
+                        }
+
+                        this.collationIndex = CharsetMapping.MYSQL_COLLATION_INDEX_utf8;
+                    } else {
+                        if (this.getColumnLength() == MysqlDefs.LENGTH_TINYBLOB) {
+                            this.javaType = Types.VARBINARY;
+                        } else if (this.getColumnLength() == MysqlDefs.LENGTH_BLOB || this.getColumnLength() == MysqlDefs.LENGTH_MEDIUMBLOB
+                            || this.getColumnLength() == MysqlDefs.LENGTH_LONGBLOB) {
+                            this.javaType = Types.LONGVARBINARY;
+                        }
+                    }
+                } else {
+                    // *TEXT masquerading as blob
+                    this.javaType = Types.LONGVARCHAR;
+                }
+            }
+
             // Re-map TINYINT(1) as bit or pseudo-boolean
             if (this.javaType == Types.TINYINT && this.field.getColumnLength() == 1 && connection.getTinyInt1isBit()) {
                 if (connection.getTransformedBitIsBoolean()) {
@@ -53,12 +85,35 @@ public class FieldWithMetadata {
             }
 
             if (!isNativeNumericType() && !isNativeDateTimeType()) {
+                this.encoding = connection.getEncodingForIndex(this.collationIndex);
+
+                // ucs2, utf16, and utf32 cannot be used as a client character set, but if it was received from server under some circumstances we can parse them as
+                // utf16
+                if ("UnicodeBig".equals(this.encoding)) {
+                    this.encoding = "UTF-16";
+                }
+
+                // MySQL encodes JSON data with utf8mb4.
+                if (vitessType == Query.Type.JSON) {
+                    this.encoding = "UTF-8";
+                }
+
                 if (this.javaType == Types.BIT) {
                     this.isSingleBit = field.getColumnLength() == 0 || field.getColumnLength() == 1;
                 } else {
                     this.isSingleBit = false;
                 }
+
+                // Re-map improperly typed binary types as non-binary counterparts if BINARY flag not set
+                boolean isBinary = isBinary();
+                if (javaType == Types.LONGVARBINARY && !isBinary) {
+                    this.javaType = Types.LONGVARCHAR;
+                } else if (javaType == Types.VARBINARY && !isBinary) {
+                    this.javaType = Types.VARCHAR;
+                }
             } else {
+                // Default encoding for number-types and date-types
+                this.encoding = "US-ASCII";
                 this.isSingleBit = false;
             }
 
@@ -94,6 +149,7 @@ public class FieldWithMetadata {
             }
         } else {
             // Defaults to appease final variables when not including all fields
+            this.isImplicitTempTable = false;
             this.isSingleBit = false;
             this.precisionAdjustFactor = 0;
         }
@@ -124,6 +180,37 @@ public class FieldWithMetadata {
             default:
                 return false;
         }
+    }
+
+    private boolean shouldSetupForUtf8StringInBlob() throws SQLException {
+        String includePattern = connection.getUtf8OutsideBmpIncludedColumnNamePattern();
+        String excludePattern = connection.getUtf8OutsideBmpExcludedColumnNamePattern();
+
+        // When UseBlobToStoreUTF8OutsideBMP is set, we by default set blobs to UTF-8. So we first
+        // look for fields to exclude from that remapping (blacklist)
+        if (excludePattern != null && !StringUtils.isNullOrEmptyWithoutWS(excludePattern)) {
+            try {
+                if (getOrgName().matches(excludePattern)) {
+                    // If we want to include more specific patters that were inadvertently covered by the exclude pattern,
+                    // we set the includePattern (whitelist)
+                    if (includePattern != null && !StringUtils.isNullOrEmptyWithoutWS(includePattern)) {
+                        try {
+                            if (getOrgName().matches(includePattern)) {
+                                return true;
+                            }
+                        } catch (PatternSyntaxException pse) {
+                            throw new SQLException("Illegal regex specified for \"utf8OutsideBmpIncludedColumnNamePattern\"", pse);
+                        }
+                    }
+
+                    return false;
+                }
+            } catch (PatternSyntaxException pse) {
+                throw new SQLException("Illegal regex specified for \"utf8OutsideBmpExcludedColumnNamePattern\"", pse);
+            }
+        }
+
+        return true;
     }
 
     public boolean isAutoIncrement() throws SQLException {
@@ -194,7 +281,21 @@ public class FieldWithMetadata {
     }
 
     boolean isOpaqueBinary() throws SQLException {
-        return false;
+        if (!connection.isIncludeAllFields()) {
+            return false;
+        }
+
+        // Detect CHAR(n) CHARACTER SET BINARY which is a synonym for fixed-length binary types
+        if (this.collationIndex == CharsetMapping.MYSQL_COLLATION_INDEX_binary && isBinary()
+            && (this.javaType == Types.CHAR || this.javaType == Types.VARCHAR)) {
+            // Okay, queries resolved by temp tables also have this 'signature', check for that
+            return !isImplicitTemporaryTable();
+        }
+
+        // this is basically always false unless a valid charset is not found and someone explicitly sets a fallback
+        // using ConnectionProperties, as binary defaults to ISO8859-1 per mysql-connector-j implementation
+        return "binary".equalsIgnoreCase(getEncoding());
+
     }
 
     /**
@@ -212,6 +313,34 @@ public class FieldWithMetadata {
         String orgTableName = getOrgTable();
 
         return !(orgColumnName != null && orgColumnName.length() > 0 && orgTableName != null && orgTableName.length() > 0);
+    }
+
+    public synchronized String getCollation() throws SQLException {
+        if (!connection.isIncludeAllFields()) {
+            return null;
+        }
+
+        if (this.collationName == null) {
+            int collationIndex = getCollationIndex();
+            try {
+                this.collationName = CharsetMapping.COLLATION_INDEX_TO_COLLATION_NAME[collationIndex];
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                throw new SQLException("CollationIndex '" + collationIndex + "' out of bounds for collationName lookup, should be within 0 and " +  CharsetMapping.COLLATION_INDEX_TO_COLLATION_NAME.length, ex);
+            }
+        }
+        return this.collationName;
+    }
+
+
+    public synchronized int getMaxBytesPerCharacter() throws SQLException {
+        if (!connection.isIncludeAllFields()) {
+            return 0;
+        }
+
+        if (this.maxBytesPerChar == 0) {
+            this.maxBytesPerChar = this.connection.getMaxBytesPerChar(getCollationIndex(), getEncoding());
+        }
+        return this.maxBytesPerChar;
     }
 
     public String getName() {
@@ -272,6 +401,20 @@ public class FieldWithMetadata {
         return field.getTypeValue();
     }
 
+    public boolean isImplicitTemporaryTable() {
+        if (!connection.isIncludeAllFields()) {
+            return false;
+        }
+        return isImplicitTempTable;
+    }
+
+    public String getEncoding() {
+        if (!connection.isIncludeAllFields()) {
+            return null;
+        }
+        return encoding;
+    }
+
     /**
      * Precision can be calculated from column length, but needs
      * to be adjusted for the extra values that can be included for the various
@@ -289,6 +432,10 @@ public class FieldWithMetadata {
             return false;
         }
         return isSingleBit;
+    }
+
+    private int getCollationIndex() {
+        return collationIndex;
     }
 
     @Override
@@ -345,6 +492,12 @@ public class FieldWithMetadata {
             if (isZeroFill()) {
                 asString.append(" ZEROFILL");
             }
+
+            asString.append(", charsetIndex=");
+            asString.append(this.collationIndex);
+            asString.append(", charsetName=");
+            asString.append(this.encoding);
+            asString.append("]");
 
             return asString.toString();
         } catch (Throwable t) {

@@ -310,6 +310,41 @@
   "SecondaryPKValues": [2, null]
 }
 
+# on dup, with values() func
+"insert into a (eid, id, name) values (1, 2, 'foo') on duplicate key update name = values(name)"
+{
+  "PlanID": "UPSERT_PK",
+  "TableName": "a",
+  "FullQuery": "insert into a(eid, id, name) values (1, 2, 'foo') on duplicate key update name = values(name)",
+  "OuterQuery": "insert into a(eid, id, name) values (1, 2, 'foo')",
+  "UpsertQuery": "update a set name = 'foo' where :#pk",
+  "PKValues": [1, 2]
+}
+
+# on dup pk change, with values() func
+"insert into b (eid, id) values (1, 2) on duplicate key update eid = values(eid), id = values(id)"
+{
+  "PlanID": "UPSERT_PK",
+  "TableName": "b",
+  "FullQuery": "insert into b(eid, id) values (1, 2) on duplicate key update eid = values(eid), id = values(id)",
+  "OuterQuery": "insert into b(eid, id) values (1, 2)",
+  "UpsertQuery": "update b set eid = 1, id = 2 where :#pk",
+  "PKValues": [1, 2],
+  "SecondaryPKValues": [1, 2]
+}
+
+# on dup pk change, with mixed expr and values() func
+"insert into a (eid, id, name) values (1, 2, 'foo') on duplicate key update eid = 2, id = values(id), name = func()"
+{
+  "PlanID": "UPSERT_PK",
+  "TableName": "a",
+  "FullQuery": "insert into a(eid, id, name) values (1, 2, 'foo') on duplicate key update eid = 2, id = values(id), name = func()",
+  "OuterQuery": "insert into a(eid, id, name) values (1, 2, 'foo')",
+  "UpsertQuery": "update a set eid = 2, id = 2, name = func() where :#pk",
+  "PKValues": [1, 2],
+  "SecondaryPKValues": [2, 2]
+}
+
 # on dup complex pk change
 "insert into b (id, eid) values (1, 2) on duplicate key update eid = func(a)"
 {

@@ -104,10 +104,10 @@ func (pt PlanType) MarshalJSON() ([]byte, error) {
 
 // MinRole is the minimum Role required to execute this PlanType.
 func (pt PlanType) MinRole() tableacl.Role {
-	return tableAclRoles[pt]
+	return tableACLRoles[pt]
 }
 
-var tableAclRoles = map[PlanType]tableacl.Role{
+var tableACLRoles = map[PlanType]tableacl.Role{
 	PlanPassSelect:     tableacl.READER,
 	PlanSelectLock:     tableacl.READER,
 	PlanSet:            tableacl.READER,
@@ -134,6 +134,7 @@ const (
 	ReasonPKChange
 	ReasonComplexExpr
 	ReasonUpsert
+	ReasonUpsertColMismatch
 )
 
 // Must exactly match order of reason constants.
@@ -144,6 +145,7 @@ var reasonName = []string{
 	"PK_CHANGE",
 	"COMPLEX_EXPR",
 	"UPSERT",
+	"UPSERT_COL_MISMATCH",
 }
 
 // String returns a string representation of a ReasonType.

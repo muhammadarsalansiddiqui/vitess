@@ -1,6 +1,7 @@
 package com.flipkart.vitess.jdbc;
 
 import com.flipkart.vitess.util.Constants;
+import com.flipkart.vitess.util.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import com.youtube.vitess.client.cursor.Cursor;
@@ -10,6 +11,7 @@ import com.youtube.vitess.proto.Query;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -28,6 +30,7 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -217,9 +220,14 @@ public class VitessResultSet implements ResultSet {
         }
 
         object = this.row.getObject(columnIndex);
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
 
         if (object instanceof byte[]) {
-            columnValue = new String((byte[]) object);
+            if (vitessStatement != null && field.getConnection().isIncludeAllFields()) {
+                columnValue = convertBytesToString((byte[]) object, field);
+            } else {
+                columnValue = new String((byte[]) object);
+            }
         } else {
             columnValue = String.valueOf(object);
         }
@@ -549,7 +557,51 @@ public class VitessResultSet implements ResultSet {
             return null;
         }
 
-        return this.row.getObject(columnIndex);
+        Object retVal = this.row.getObject(columnIndex);
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
+
+        if (vitessStatement != null && field.getConnection().isIncludeAllFields() && retVal instanceof byte[]) {
+            retVal = convertBytesIfPossible((byte[]) retVal, columnIndex);
+        }
+
+        return retVal;
+    }
+
+    private Object convertBytesIfPossible(byte[] bytes, int columnIndex) throws SQLException {
+        FieldWithMetadata field = this.fields.get(columnIndex - 1);
+        switch (field.getJavaType()) {
+            case Types.BIT:
+                if (!field.isSingleBit()) {
+                    return bytes;
+                }
+                return byteArrayToBoolean(bytes);
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+                if (!field.isOpaqueBinary()) {
+                    return convertBytesToString(bytes, field);
+                }
+                return bytes;
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return bytes;
+            default:
+                return convertBytesToString(bytes, field);
+        }
+    }
+
+    private String convertBytesToString(byte[] bytes, FieldWithMetadata field) throws SQLException {
+        String encoding = field.getEncoding();
+        if (encoding == null) {
+            return StringUtils.toString(bytes);
+        } else {
+            try {
+                return StringUtils.toString(bytes, 0, bytes.length, encoding);
+            } catch (UnsupportedEncodingException e) {
+                throw new SQLException("Unsupported character encoding: " + encoding, e);
+            }
+        }
     }
 
     public Object getObject(String columnLabel) throws SQLException {

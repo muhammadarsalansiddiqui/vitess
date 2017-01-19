@@ -51,6 +51,25 @@ public class VitessResultSetMetaData implements ResultSetMetaData {
             case Types.TIME:
             case Types.TIMESTAMP:
                 return false;
+
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+                if (field.isBinary() || !connection.isIncludeAllFields()) {
+                    return true;
+                }
+
+                try {
+                    String collationName = field.getCollation();
+                    return collationName != null && !collationName.endsWith("_ci");
+                } catch (SQLException e) {
+                    if (e.getCause() instanceof ArrayIndexOutOfBoundsException) {
+                        return false;
+                    } else {
+                        throw e;
+                    }
+                }
+
             default:
                 return true;
         }
@@ -73,7 +92,11 @@ public class VitessResultSetMetaData implements ResultSetMetaData {
     }
 
     public int getColumnDisplaySize(int column) throws SQLException {
-        return 0;
+        if (!connection.isIncludeAllFields()) {
+            return 0;
+        }
+        FieldWithMetadata field = getField(column);
+        return field.getColumnLength() / field.getMaxBytesPerCharacter();
     }
 
     public String getColumnLabel(int column) throws SQLException {
@@ -89,7 +112,22 @@ public class VitessResultSetMetaData implements ResultSetMetaData {
     }
 
     public int getPrecision(int column) throws SQLException {
-        return 0;
+        if (!connection.isIncludeAllFields()) {
+            return 0;
+        }
+
+        FieldWithMetadata field = getField(column);
+        if (isDecimalType(field.getJavaType(), field.getVitessTypeValue())) {
+            return field.getColumnLength() + field.getPrecisionAdjustFactor();
+        }
+
+        switch (field.getJavaType()) {
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return field.getColumnLength();
+            default:
+                return field.getColumnLength() / field.getMaxBytesPerCharacter();
+        }
     }
 
     private static boolean isDecimalType(int javaType, int vitessType) {

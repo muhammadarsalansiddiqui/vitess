@@ -32,42 +32,44 @@ func forceEOF(yylex interface{}) {
 %}
 
 %union {
-  empty       struct{}
-  statement   Statement
-  selStmt     SelectStatement
-  byt         byte
-  bytes       []byte
-  bytes2      [][]byte
-  str         string
-  selectExprs SelectExprs
-  selectExpr  SelectExpr
-  columns     Columns
-  colName     *ColName
-  tableExprs  TableExprs
-  tableExpr   TableExpr
-  tableName   *TableName
-  indexHints  *IndexHints
-  expr        Expr
-  boolExpr    BoolExpr
-  boolVal     BoolVal
-  valExpr     ValExpr
-  colTuple    ColTuple
-  valExprs    ValExprs
-  values      Values
-  valTuple    ValTuple
-  subquery    *Subquery
-  caseExpr    *CaseExpr
-  whens       []*When
-  when        *When
-  orderBy     OrderBy
-  order       *Order
-  limit       *Limit
-  insRows     InsertRows
-  updateExprs UpdateExprs
-  updateExpr  *UpdateExpr
-  colIdent    ColIdent
-  colIdents   []ColIdent
-  tableIdent  TableIdent
+  empty            struct{}
+  statement        Statement
+  selStmt          SelectStatement
+  byt              byte
+  bytes            []byte
+  bytes2           [][]byte
+  str              string
+  selectExprs      SelectExprs
+  selectExpr       SelectExpr
+  columns          Columns
+  colName          *ColName
+  tableExprs       TableExprs
+  tableExpr        TableExpr
+  tableName        *TableName
+  indexHints       *IndexHints
+  expr             Expr
+  boolExpr         BoolExpr
+  boolVal          BoolVal
+  valExpr          ValExpr
+  colTuple         ColTuple
+  valExprs         ValExprs
+  values           Values
+  valTuple         ValTuple
+  subquery         *Subquery
+  caseExpr         *CaseExpr
+  whens            []*When
+  when             *When
+  orderBy          OrderBy
+  order            *Order
+  limit            *Limit
+  insRows          InsertRows
+  updateExprs      UpdateExprs
+  updateExpr       *UpdateExpr
+  onDupUpdateExprs OnDupUpdateExprs
+  onDupUpdateExpr  *OnDupUpdateExpr
+  colIdent         ColIdent
+  colIdents        []ColIdent
+  tableIdent       TableIdent
 }
 
 %token LEX_ERROR
@@ -160,7 +162,8 @@ func forceEOF(yylex interface{}) {
 %type <limit> limit_opt
 %type <str> lock_opt
 %type <columns> column_list_opt column_list
-%type <updateExprs> on_dup_opt
+%type <onDupUpdateExprs> on_dup_opt on_dup_update_list
+%type <onDupUpdateExpr> on_dup_update_expression
 %type <updateExprs> update_list
 %type <updateExpr> update_expression
 %type <empty> for_from
@@ -1166,7 +1169,7 @@ on_dup_opt:
   {
     $$ = nil
   }
-| ON DUPLICATE KEY UPDATE update_list
+| ON DUPLICATE KEY UPDATE on_dup_update_list
   {
     $$ = $5
   }
@@ -1195,6 +1198,26 @@ row_tuple:
   openb value_expression_list closeb
   {
     $$ = ValTuple($2)
+  }
+
+on_dup_update_list:
+  on_dup_update_expression
+  {
+    $$ = OnDupUpdateExprs{$1}
+  }
+| on_dup_update_list ',' on_dup_update_expression
+  {
+    $$ = append($1, $3)
+  }
+
+on_dup_update_expression:
+  update_expression
+  {
+    $$ = &OnDupUpdateExpr{Name: $1.Name, Expr: $1.Expr, UseLookup: false}
+  }
+| sql_id '=' VALUES openb sql_id closeb
+  {
+    $$ = &OnDupUpdateExpr{Name: $1, LookupName: $5, UseLookup: true}
   }
 
 update_list:

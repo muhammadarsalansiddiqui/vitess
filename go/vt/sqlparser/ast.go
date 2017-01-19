@@ -1740,19 +1740,71 @@ func (node *UpdateExpr) WalkSubtree(visit Visit) error {
 }
 
 // OnDup represents an ON DUPLICATE KEY clause.
-type OnDup UpdateExprs
+type OnDup OnDupUpdateExprs
 
 // Format formats the node.
 func (node OnDup) Format(buf *TrackedBuffer) {
 	if node == nil {
 		return
 	}
-	buf.Myprintf(" on duplicate key update %v", UpdateExprs(node))
+	buf.Myprintf(" on duplicate key update %v", OnDupUpdateExprs(node))
 }
 
 // WalkSubtree walks the nodes of the subtree.
 func (node OnDup) WalkSubtree(visit Visit) error {
-	return Walk(visit, UpdateExprs(node))
+	return Walk(visit, OnDupUpdateExprs(node))
+}
+
+// OnDupUpdateExprs represents a list of update expressions for an
+// on duplicate key update.
+type OnDupUpdateExprs []*OnDupUpdateExpr
+
+// Format formats the node.
+func (node OnDupUpdateExprs) Format(buf *TrackedBuffer) {
+	var prefix string
+	for _, n := range node {
+		buf.Myprintf("%s%v", prefix, n)
+		prefix = ", "
+	}
+}
+
+// WalkSubtree walks the nodes of the subtree.
+func (node OnDupUpdateExprs) WalkSubtree(visit Visit) error {
+	for _, n := range node {
+		if err := Walk(visit, n); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// OnDupUpdateExpr represents a single update expression for
+// an on duplicate key update. Can contain a LookupName, in the
+// case of foo = VALUES(foo), or an actual expression in the case of foo = bar
+type OnDupUpdateExpr struct {
+	Name       ColIdent
+	Expr       ValExpr
+	LookupName ColIdent
+	UseLookup  bool
+}
+
+// Format formats the node.
+func (node OnDupUpdateExpr) Format(buf *TrackedBuffer) {
+	if node.UseLookup {
+		buf.Myprintf("%v = values(%v)", node.Name, node.LookupName)
+	} else if node.Expr != nil {
+		buf.Myprintf("%v = %v", node.Name, node.Expr)
+	}
+}
+
+// WalkSubtree walks the nodes of the subtree.
+func (node OnDupUpdateExpr) WalkSubtree(visit Visit) error {
+	return Walk(
+		visit,
+		node.Name,
+		node.Expr,
+		node.LookupName,
+	)
 }
 
 // ColIdent is a case insensitive SQL identifier. It will be escaped with

@@ -310,7 +310,12 @@ func analyzeInsert(ins *sqlparser.Insert, getTable TableGetter) (plan *ExecPlan,
 		plan.Reason = ReasonUpsert
 		return plan, nil
 	}
-	plan.SecondaryPKValues, err = analyzeUpdateExpressions(sqlparser.UpdateExprs(ins.OnDup), tableInfo.Indexes[0])
+	updateExprs, err := generateUpsertUpdateExprs(tableInfo, rowList, ins.OnDup)
+	if err != nil {
+		plan.Reason = ReasonUpsertColMismatch
+		return plan, nil
+	}
+	plan.SecondaryPKValues, err = analyzeUpdateExpressions(updateExprs[0], tableInfo.Indexes[0])
 	if err != nil {
 		plan.Reason = ReasonPKChange
 		return plan, nil
@@ -323,10 +328,38 @@ func analyzeInsert(ins *sqlparser.Insert, getTable TableGetter) (plan *ExecPlan,
 	upd := &sqlparser.Update{
 		Comments: ins.Comments,
 		Table:    ins.Table,
-		Exprs:    sqlparser.UpdateExprs(ins.OnDup),
+		Exprs:    updateExprs[0],
 	}
 	plan.UpsertQuery = GenerateUpdateOuterQuery(upd)
 	return plan, nil
+}
+
+// generateUpsertUpdateExprs creates new UpdateExprs with any VALUES()
+// references replaced with the value they were meant to lookup
+// i.e. VALUES(foo) lookups up the insert value for column foo from the original
+// insert rows.
+// Supports multi-row inserts, though this is disallowed in analyzeInsert above
+func generateUpsertUpdateExprs(tableInfo *schema.Table, rowList sqlparser.Values, dup sqlparser.OnDup) ([]sqlparser.UpdateExprs, error) {
+	result := make([]sqlparser.UpdateExprs, len(rowList))
+	for i, rowTuple := range rowList {
+		rowResults := make([]*sqlparser.UpdateExpr, len(dup))
+		for j, update := range dup {
+			colResult := &sqlparser.UpdateExpr{Name: update.Name}
+			if update.UseLookup {
+				colID := tableInfo.FindColumn(update.LookupName)
+				if colID == -1 {
+					return nil, fmt.Errorf("Could not find column %v", update.LookupName)
+				}
+				colResult.Expr = rowTuple[colID]
+			} else {
+				colResult.Expr = update.Expr
+			}
+			rowResults[j] = colResult
+		}
+		result[i] = sqlparser.UpdateExprs(rowResults)
+	}
+
+	return result, nil
 }
 
 func getInsertPKColumns(columns sqlparser.Columns, tableInfo *schema.Table) (pkColumnNumbers []int) {

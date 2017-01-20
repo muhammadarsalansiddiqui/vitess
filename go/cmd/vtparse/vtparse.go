@@ -102,7 +102,7 @@ var (
 	queryCache           = make(map[string]int)
 	ignoreCache          = make(map[string]bool)
 	unknownErrorExamples = make(map[string]string)
-	handledErrorExamples = make(map[string]string)
+	handledErrorExamples = make(map[string]*handledErrorExample)
 
 	unknownErrorCounts = make(map[string]int)
 	handledErrorCounts = make(map[string]int)
@@ -308,9 +308,9 @@ OUTER:
 
 	if len(handledErrorCounts) > 0 {
 		out.WriteString("\n\nHANDLED ERRORS:\n")
-		for errString, query := range handledErrorExamples {
-			count := handledErrorCounts[errString]
-			out.WriteString(fmt.Sprintf("\nQuery:\n%s\nError: %v\nCount: %d\n-----", query, errString, count))
+		for _type, example := range handledErrorExamples {
+			count := handledErrorCounts[_type]
+			out.WriteString(fmt.Sprintf("\nQuery:\n%s\nError: %v\nType: %v\nCount: %d\n-----", example.sql, example.err, _type, count))
 		}
 	}
 
@@ -505,7 +505,7 @@ func tryParse(sql string, vs *vindexes.VSchema, db *sql.DB) bool {
 				handledErrors++
 				handledErrorCounts[errType]++
 				if _, ok := handledErrorExamples[errType]; !ok {
-					handledErrorExamples[errType] = sql
+					handledErrorExamples[errType] = &handledErrorExample{sql, err.Error()}
 				}
 				queryCache[sql] = 2
 			} else {
@@ -609,6 +609,10 @@ func errIsIgnored(err error) bool {
 type handledError struct {
 	pattern *regexp.Regexp
 	errType string
+}
+
+type handledErrorExample struct {
+	sql, err string
 }
 
 func errIsHandled(sql string) (string, bool) {

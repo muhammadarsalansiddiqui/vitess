@@ -205,7 +205,7 @@ var keywords = map[string]int{
 	"release":             UNUSED,
 	"rename":              RENAME,
 	"repeat":              UNUSED,
-	"replace":             UNUSED,
+	"replace":             REPLACE,
 	"require":             UNUSED,
 	"resignal":            UNUSED,
 	"restrict":            UNUSED,

@@ -75,7 +75,7 @@ var (
 		{regexp.MustCompile("(?i)UNHEX\\(.*\\)"), "UNHEX() function"},
 		{regexp.MustCompile("(?i)CURRENT_TIMESTAMP|utc_timestamp|UNIX_TIMESTAMP|CURRENT_DATE"), "UNIX_TIMESTAMP() and variants"},
 		{regexp.MustCompile("(?i)\\(\\w+ OR \\w+\\) AS"), "OR in SELECT"},
-		{regexp.MustCompile("(?i)SELECT \\(?[^)]+OR[^)]+\\)?.*FROM"), "OR in SELECT"},
+		{regexp.MustCompile("(?i)SELECT \\(?[^)]+ OR [^)]+\\)?.*FROM"), "OR in SELECT"},
 		{regexp.MustCompile("(?i)^REPLACE (?:INTO)?.*VALUES"), "REPLACE INTO"},
 		{regexp.MustCompile("(?i)^(?:RELEASE )?SAVEPOINT .+"), "SAVEPOINT/RELEASE SAVEPOINT"},
 		{regexp.MustCompile("(?i)^ROLLBACK (?:WORK)?TO (?:SAVEPOINT)?.+"), "ROLLBACK SAVEPOINT"},

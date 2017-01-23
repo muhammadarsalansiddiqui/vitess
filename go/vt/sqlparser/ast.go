@@ -997,7 +997,7 @@ const (
 	NotRegexpStr         = "not regexp"
 	JSONExtractOp        = "->"
 	JSONUnquoteExtractOp = "->>"
-	CollateStr 	     = "collate"
+	CollateStr           = "collate"
 )
 
 // Format formats the node.
@@ -1371,6 +1371,7 @@ const (
 	MinusStr      = "-"
 	MultStr       = "*"
 	DivStr        = "/"
+	IntDivStr     = "DIV"
 	ModStr        = "%"
 	ShiftLeftStr  = "<<"
 	ShiftRightStr = ">>"

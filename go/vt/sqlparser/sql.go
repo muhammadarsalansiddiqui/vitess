@@ -1853,7 +1853,7 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		//line ./go/vt/sqlparser/sql.y:850
 		{
-			yyVAL.valExpr = &BinaryExpr{Left: yyDollar[1].valExpr, Operator: DivStr, Right: yyDollar[3].valExpr}
+			yyVAL.valExpr = &BinaryExpr{Left: yyDollar[1].valExpr, Operator: IntDivStr, Right: yyDollar[3].valExpr}
 		}
 	case 153:
 		yyDollar = yyS[yypt-3 : yypt+1]

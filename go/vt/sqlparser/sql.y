@@ -848,7 +848,7 @@ value_expression:
   }
 | value_expression DIV value_expression
   {
-    $$ = &BinaryExpr{Left: $1, Operator: DivStr, Right: $3}
+    $$ = &BinaryExpr{Left: $1, Operator: IntDivStr, Right: $3}
   }
 | value_expression '%' value_expression
   {

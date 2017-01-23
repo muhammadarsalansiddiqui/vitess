@@ -307,7 +307,9 @@ func TestValid(t *testing.T) {
 	}, {
 		input: "select /* / */ 1 from t where a = b / c",
 	}, {
-		input: "select /* % */ 1 from t where a = b % c",
+		input: "select /* / */ 1 from t where a = b / c",
+	}, {
+		input: "select /* DIV */ 1 from t where a = b DIV c",
 	}, {
 		input:  "select /* MOD */ 1 from t where a = b MOD c",
 		output: "select /* MOD */ 1 from t where a = b % c",

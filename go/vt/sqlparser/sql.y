@@ -95,7 +95,7 @@ func forceEOF(yylex interface{}) {
 %left <empty> '&'
 %left <empty> SHIFT_LEFT SHIFT_RIGHT
 %left <empty> '+' '-'
-%left <empty> '*' '/' '%' MOD
+%left <empty> '*' '/' DIV '%' MOD
 %left <empty> '^'
 %right <empty> '~' UNARY
 %left <empty> COLLATE
@@ -843,6 +843,10 @@ value_expression:
     $$ = &BinaryExpr{Left: $1, Operator: MultStr, Right: $3}
   }
 | value_expression '/' value_expression
+  {
+    $$ = &BinaryExpr{Left: $1, Operator: DivStr, Right: $3}
+  }
+| value_expression DIV value_expression
   {
     $$ = &BinaryExpr{Left: $1, Operator: DivStr, Right: $3}
   }

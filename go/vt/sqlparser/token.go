@@ -89,7 +89,7 @@ var keywords = map[string]int{
 	"deterministic":       UNUSED,
 	"distinct":            DISTINCT,
 	"distinctrow":         UNUSED,
-	"div":                 UNUSED,
+	"div":                 DIV,
 	"double":              UNUSED,
 	"drop":                DROP,
 	"duplicate":           DUPLICATE,

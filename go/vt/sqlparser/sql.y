@@ -160,7 +160,7 @@ func forceEOF(yylex interface{}) {
 %type <str> asc_desc_opt
 %type <limit> limit_opt
 %type <str> lock_opt
-%type <columns> column_list_opt column_list
+%type <columns> column_list_opt column_list using_expression
 %type <updateExprs> on_dup_opt
 %type <updateExprs> update_list
 %type <updateExpr> update_expression
@@ -495,6 +495,20 @@ join_table:
 | table_reference natural_join table_factor
   {
     $$ = &JoinTableExpr{LeftExpr: $1, Join: $2, RightExpr: $3}
+  }
+| table_reference inner_join table_factor USING using_expression
+  {
+    $$ = &JoinTableExpr{LeftExpr: $1, Join: $2, RightExpr: $3, Using: $5}
+  }
+| table_reference outer_join table_factor USING using_expression
+  {
+    $$ = &JoinTableExpr{LeftExpr: $1, Join: $2, RightExpr: $3, Using: $5}
+  }
+
+using_expression:
+  openb column_list closeb
+  {
+    $$ = $2
   }
 
 as_opt:

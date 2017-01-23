@@ -734,6 +734,7 @@ type JoinTableExpr struct {
 	Join      string
 	RightExpr TableExpr
 	On        BoolExpr
+	Using     Columns
 }
 
 // JoinTableExpr.Join
@@ -753,6 +754,9 @@ func (node *JoinTableExpr) Format(buf *TrackedBuffer) {
 	if node.On != nil {
 		buf.Myprintf(" on %v", node.On)
 	}
+	if node.Using != nil {
+		buf.Myprintf(" using(%v)", node.Using)
+	}
 }
 
 // WalkSubtree walks the nodes of the subtree.
@@ -765,6 +769,7 @@ func (node *JoinTableExpr) WalkSubtree(visit Visit) error {
 		node.LeftExpr,
 		node.RightExpr,
 		node.On,
+		node.Using,
 	)
 }
 
@@ -997,7 +1002,7 @@ const (
 	NotRegexpStr         = "not regexp"
 	JSONExtractOp        = "->"
 	JSONUnquoteExtractOp = "->>"
-	CollateStr 	     = "collate"
+	CollateStr           = "collate"
 )
 
 // Format formats the node.

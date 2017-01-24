@@ -223,7 +223,7 @@ insert_statement:
     cols := make(Columns, 0, len($6))
     vals := make(ValTuple, 0, len($7))
     for _, updateList := range $6 {
-      cols = append(cols, updateList.Name)
+      cols = append(cols, updateList.Name.Name)
       vals = append(vals, updateList.Expr)
     }
     $$ = &Insert{Comments: Comments($2), Ignore: $3, Table: $4, Columns: cols, Rows: Values{vals}, OnDup: OnDup($7)}
@@ -1213,7 +1213,7 @@ update_list:
   }
 
 update_expression:
-  sql_id '=' value_expression
+  column_name '=' value_expression
   {
     $$ = &UpdateExpr{Name: $1, Expr: $3}
   }

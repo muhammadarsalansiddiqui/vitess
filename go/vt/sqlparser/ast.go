@@ -997,7 +997,7 @@ const (
 	NotRegexpStr         = "not regexp"
 	JSONExtractOp        = "->"
 	JSONUnquoteExtractOp = "->>"
-	CollateStr 	     = "collate"
+	CollateStr           = "collate"
 )
 
 // Format formats the node.
@@ -1719,7 +1719,7 @@ func (node UpdateExprs) WalkSubtree(visit Visit) error {
 
 // UpdateExpr represents an update expression.
 type UpdateExpr struct {
-	Name ColIdent
+	Name *ColName
 	Expr ValExpr
 }
 

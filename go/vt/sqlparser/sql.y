@@ -86,14 +86,14 @@ func forceEOF(yylex interface{}) {
 // support all operators yet.
 %left <empty> OR
 %left <empty> AND
-%right <empty> NOT
+%right <empty> NOT '!'
 %left <empty> BETWEEN CASE WHEN THEN ELSE END
 %left <empty> '=' '<' '>' LE GE NE NULL_SAFE_EQUAL IS LIKE REGEXP IN
 %left <empty> '|'
 %left <empty> '&'
 %left <empty> SHIFT_LEFT SHIFT_RIGHT
 %left <empty> '+' '-'
-%left <empty> '*' '/' '%' MOD
+%left <empty> '*' '/' DIV '%' MOD
 %left <empty> '^'
 %right <empty> '~' UNARY
 %left <empty> COLLATE
@@ -226,7 +226,7 @@ insert_statement:
     cols := make(Columns, 0, len($6))
     vals := make(ValTuple, 0, len($7))
     for _, updateList := range $6 {
-      cols = append(cols, updateList.Name)
+      cols = append(cols, updateList.Name.Name)
       vals = append(vals, updateList.Expr)
     }
     $$ = &Insert{Comments: Comments($2), Ignore: $3, Table: $4, Columns: cols, Rows: Values{vals}, OnDup: OnDup($7)}
@@ -848,6 +848,10 @@ value_expression:
   {
     $$ = &BinaryExpr{Left: $1, Operator: DivStr, Right: $3}
   }
+| value_expression DIV value_expression
+  {
+    $$ = &BinaryExpr{Left: $1, Operator: IntDivStr, Right: $3}
+  }
 | value_expression '%' value_expression
   {
     $$ = &BinaryExpr{Left: $1, Operator: ModStr, Right: $3}
@@ -901,6 +905,10 @@ value_expression:
 | '~'  value_expression
   {
     $$ = &UnaryExpr{Operator: TildaStr, Expr: $2}
+  }
+| '!' value_expression %prec UNARY
+  {
+    $$ = &UnaryExpr{Operator: BangStr, Expr: $2}
   }
 | INTERVAL value_expression sql_id
   {
@@ -1280,7 +1288,7 @@ update_list:
   }
 
 update_expression:
-  sql_id '=' expression
+  column_name '=' expression
   {
     $$ = &UpdateExpr{Name: $1, Expr: $3}
   }

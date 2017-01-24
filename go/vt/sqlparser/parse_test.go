@@ -219,6 +219,8 @@ func TestValid(t *testing.T) {
 	}, {
 		input: "select /* not */ 1 from t where not a = b",
 	}, {
+		input: "select /* ! */ 1 from t where a = !1",
+	}, {
 		input: "select /* bool is */ 1 from t where a = b is null",
 	}, {
 		input: "select /* bool is not */ 1 from t where a = b is not false",
@@ -311,6 +313,8 @@ func TestValid(t *testing.T) {
 		input: "select /* / */ 1 from t where a = b / c",
 	}, {
 		input: "select /* % */ 1 from t where a = b % c",
+	}, {
+		input: "select /* DIV */ 1 from t where a = b DIV c",
 	}, {
 		input:  "select /* MOD */ 1 from t where a = b MOD c",
 		output: "select /* MOD */ 1 from t where a = b % c",
@@ -510,6 +514,10 @@ func TestValid(t *testing.T) {
 		input: "update /* bool expr in update */ a set b = 5 > 2",
 	}, {
 		input: "update /* bool in update where */ a set b = 5 where c",
+	}, {
+		input: "update /* table qualifier */ a set a.b = 3",
+	}, {
+		input: "update /* table qualifier */ a set t.a.b = 3",
 	}, {
 		input: "delete /* simple */ from a",
 	}, {
@@ -859,9 +867,6 @@ func TestErrors(t *testing.T) {
 		input  string
 		output string
 	}{{
-		input:  "select !8 from t",
-		output: "syntax error at position 9 near '!'",
-	}, {
 		input:  "select $ from t",
 		output: "syntax error at position 9 near '$'",
 	}, {

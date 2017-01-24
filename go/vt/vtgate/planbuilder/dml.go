@@ -63,7 +63,7 @@ func generateQuery(statement sqlparser.Statement) string {
 func isIndexChanging(setClauses sqlparser.UpdateExprs, colVindexes []*vindexes.ColumnVindex) bool {
 	for _, assignment := range setClauses {
 		for _, vcol := range colVindexes {
-			if vcol.Column.Equal(assignment.Name) {
+			if vcol.Column.Equal(assignment.Name.Name) {
 				return true
 			}
 		}

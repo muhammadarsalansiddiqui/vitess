@@ -89,7 +89,7 @@ var keywords = map[string]int{
 	"deterministic":       UNUSED,
 	"distinct":            DISTINCT,
 	"distinctrow":         UNUSED,
-	"div":                 UNUSED,
+	"div":                 DIV,
 	"double":              UNUSED,
 	"drop":                DROP,
 	"duplicate":           DUPLICATE,
@@ -413,7 +413,7 @@ func (tkn *Tokenizer) Scan() (int, []byte) {
 				tkn.next()
 				return NE, nil
 			}
-			return LEX_ERROR, []byte("!")
+			return int(ch), nil
 		case '\'', '"':
 			return tkn.scanString(ch, STRING)
 		case '`':

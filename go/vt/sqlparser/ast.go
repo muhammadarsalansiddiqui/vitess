@@ -1349,6 +1349,7 @@ const (
 	MinusStr      = "-"
 	MultStr       = "*"
 	DivStr        = "/"
+	IntDivStr     = "DIV"
 	ModStr        = "%"
 	ShiftLeftStr  = "<<"
 	ShiftRightStr = ">>"
@@ -1382,6 +1383,7 @@ const (
 	UPlusStr  = '+'
 	UMinusStr = '-'
 	TildaStr  = '~'
+	BangStr   = '!'
 )
 
 // Format formats the node.
@@ -1749,7 +1751,7 @@ func (node UpdateExprs) WalkSubtree(visit Visit) error {
 
 // UpdateExpr represents an update expression.
 type UpdateExpr struct {
-	Name ColIdent
+	Name *ColName
 	Expr Expr
 }
 

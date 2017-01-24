@@ -101,7 +101,7 @@ func analyzeSet(set *sqlparser.Set) (plan *ExecPlan) {
 
 func analyzeUpdateExpressions(exprs sqlparser.UpdateExprs, pkIndex *schema.Index) (pkValues []interface{}, err error) {
 	for _, expr := range exprs {
-		index := pkIndex.FindColumn(expr.Name)
+		index := pkIndex.FindColumn(expr.Name.Name)
 		if index == -1 {
 			continue
 		}

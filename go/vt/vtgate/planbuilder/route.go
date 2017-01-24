@@ -126,6 +126,14 @@ func (rb *route) Join(rhs builder, ajoin *sqlparser.JoinTableExpr) (builder, err
 		}
 	}
 
+	if ajoin.Using != nil {
+		for _, column := range ajoin.Using {
+			if rb.isSameRouteByCol(rRoute, &sqlparser.ColName{Name:column}) {
+				return rb.merge(rRoute, ajoin)
+			}
+		}
+	}
+
 	// Both l & r routes point to the same shard.
 	if rb.ERoute.Opcode == engine.SelectEqualUnique && rRoute.ERoute.Opcode == engine.SelectEqualUnique {
 		if valEqual(rb.ERoute.Values, rRoute.ERoute.Values) {
@@ -171,6 +179,7 @@ func (rb *route) merge(rhs *route, ajoin *sqlparser.JoinTableExpr) (builder, err
 		}
 		rb.UpdatePlan(filter)
 	}
+
 	return rb, nil
 }
 
@@ -203,6 +212,24 @@ func (rb *route) isSameRoute(rhs *route, filter sqlparser.BoolExpr) bool {
 		return false
 	}
 	return true
+}
+
+func (rb *route) isSameRouteByCol(rhs *route, col *sqlparser.ColName) bool {
+	lVindex := rb.Symtab().Vindex(col, rb, false)
+	if lVindex == nil {
+		return false
+	}
+	rVindex := rhs.Symtab().Vindex(col, rhs, false)
+	if rVindex == nil {
+		return false
+	}
+	if rVindex != lVindex {
+		return false
+	}
+	return true
+
+
+
 }
 
 // PushFilter pushes the filter into the route. The primitive will

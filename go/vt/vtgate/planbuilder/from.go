@@ -170,6 +170,40 @@ func processJoin(ajoin *sqlparser.JoinTableExpr, vschema VSchema) (builder, erro
 	if err != nil {
 		return nil, err
 	}
+
+	if ajoin.Using != nil {
+		for _, table := range lplan.Symtab().tables {
+			other := rplan.Symtab().findTable(table.Alias)
+			if other != nil {
+				for _, col := range ajoin.Using {
+					left := &sqlparser.ColName{Name: col}
+					right := &sqlparser.ColName{Name: col}
+
+					// TODO: HELP
+					rb, _, err := lplan.Symtab().searchColsyms().Find(left, true)
+					rb.
+					if err != nil {
+						return nil, err
+					}
+
+					_, _, err = rplan.Symtab().Find(right, true)
+
+					expr := sqlparser.ComparisonExpr{
+						Left:  &sqlparser.ColName{Name: col, Qualifier: table.Alias},
+						Right: &sqlparser.ColName{Name: col, Qualifier: other.Alias},
+						Operator: sqlparser.EqualStr,
+					}
+					if ajoin.On == nil {
+						ajoin.On = expr
+						continue
+					}
+
+					ajoin.On = sqlparser.AndExpr{Left: ajoin.On, Right: expr}
+				}
+			}
+		}
+	}
+
 	return lplan.Join(rplan, ajoin)
 }
 

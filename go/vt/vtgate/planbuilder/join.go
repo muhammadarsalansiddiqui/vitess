@@ -62,20 +62,50 @@ func newJoin(lhs, rhs builder, ajoin *sqlparser.JoinTableExpr) (*join, error) {
 	if ajoin == nil {
 		return jb, nil
 	}
+	if ajoin.Using {
+		
+	}
 	if opcode == engine.LeftJoin {
-		err := pushFilter(ajoin.On, rhs, sqlparser.WhereStr)
+		err := pushFilterByJoinType(ajoin, rhs)
 		if err != nil {
 			return nil, err
 		}
 		rhs.SetRHS()
 		return jb, nil
 	}
-	err = pushFilter(ajoin.On, jb, sqlparser.WhereStr)
+	err = pushFilterByJoinType(ajoin, jb)
 	if err != nil {
 		return nil, err
 	}
 	return jb, nil
 }
+
+func pushFilterByJoinType(ajoin *sqlparser.JoinTableExpr, bldr builder) error {
+	if ajoin.On != nil {
+		err := pushFilter(ajoin.On, bldr, sqlparser.WhereStr)
+		return err
+	}
+	if ajoin.Using != nil {
+
+	}
+	return nil
+}
+
+//func getTableNamesFromJoin(expr *sqlparser.TableExpr) sqlparser.TableIdent {
+//	var tables []sqlparser.TableIdent
+//
+//	switch tbl := expr.(type) {
+//	case *sqlparser.ParenTableExpr:
+//		tbl.Exprs[0]
+//	case sqlparser.AliasedTableExpr:
+//		if !tbl.As.IsEmpty() {
+//			return tbl.As
+//		}
+//		if cast, ok := tbl.Expr.(sqlparser.TableName); ok {
+//			return cast.Name
+//		}
+//	}
+//}
 
 // Symtab returns the associated symtab.
 func (jb *join) Symtab() *symtab {

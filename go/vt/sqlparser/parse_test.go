@@ -199,6 +199,8 @@ func TestValid(t *testing.T) {
 	}, {
 		input: "select /* join on */ 1 from t1 join t2 on a = b",
 	}, {
+		input: "select /* join using */ 1 from t1 join t2 using(a)",
+	}, {
 		input: "select /* s.t */ 1 from s.t",
 	}, {
 		input: "select /* keyword schema & table name */ 1 from `By`.`bY`",

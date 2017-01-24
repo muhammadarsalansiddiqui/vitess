@@ -753,10 +753,13 @@ func (node *JoinTableExpr) Format(buf *TrackedBuffer) {
 	buf.Myprintf("%v %s %v", node.LeftExpr, node.Join, node.RightExpr)
 	if node.On != nil {
 		buf.Myprintf(" on %v", node.On)
+		return
 	}
 	if node.Using != nil {
-		buf.Myprintf(" using(%v)", node.Using)
+		buf.Myprintf(" using%v", node.Using)
+		return
 	}
+
 }
 
 // WalkSubtree walks the nodes of the subtree.

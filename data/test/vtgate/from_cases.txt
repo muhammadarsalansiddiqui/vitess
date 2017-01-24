@@ -148,6 +148,21 @@
   }
 }
 
+# Left join, single chunk
+"select m1.col from unsharded as m1 left join unsharded as m2 using(a)"
+{
+  "Original": "select m1.col from unsharded as m1 left join unsharded as m2 using(a)",
+  "Instructions": {
+    "Opcode": "SelectUnsharded",
+    "Keyspace": {
+      "Name": "main",
+      "Sharded": false
+    },
+    "Query": "select m1.col from unsharded as m1 left join unsharded as m2 using(a)",
+    "FieldQuery": "select m1.col from unsharded as m1 left join unsharded as m2 using(a) where 1 != 1"
+  }
+}
+
 # Left join, multi-chunk
 "select u.col from user u left join unsharded m on u.a = m.b"
 {
@@ -170,6 +185,42 @@
         "Sharded": false
       },
       "Query": "select 1 from unsharded as m where m.b = :u_a",
+      "FieldQuery": "select 1 from unsharded as m where 1 != 1",
+      "JoinVars": {
+        "u_a": {}
+      }
+    },
+    "Cols": [
+      -1
+    ],
+    "Vars": {
+      "u_a": 1
+    }
+  }
+}
+
+# Left join, multi-chunk, with using
+"select u.col from user u left join unsharded m using(a)"
+{
+  "Original": "select u.col from user u left join unsharded m using(a)",
+  "Instructions": {
+    "Opcode": "LeftJoin",
+    "Left": {
+      "Opcode": "SelectScatter",
+      "Keyspace": {
+        "Name": "user",
+        "Sharded": true
+      },
+      "Query": "select u.col, u.a from user as u",
+      "FieldQuery": "select u.col, u.a from user as u where 1 != 1"
+    },
+    "Right": {
+      "Opcode": "SelectUnsharded",
+      "Keyspace": {
+        "Name": "main",
+        "Sharded": false
+      },
+      "Query": "select 1 from unsharded as m where m.a = :u_a",
       "FieldQuery": "select 1 from unsharded as m where 1 != 1",
       "JoinVars": {
         "u_a": {}

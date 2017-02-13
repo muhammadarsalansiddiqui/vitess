@@ -29,6 +29,7 @@ if [ -n "$grpc_dist" ]; then
   # Create a virtualenv, which also creates a virualenv-boxed pip.
   # Update both pip and virtualenv.
   $VIRTUALENV -v $grpc_dist/usr/local
+  ensure_python2
   $grpc_dist/usr/local/bin/$PIP install --upgrade pip
   $grpc_dist/usr/local/bin/$PIP install --upgrade --ignore-installed virtualenv
 else

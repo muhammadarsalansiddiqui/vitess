@@ -45,7 +45,7 @@ if [ -f $zk_dist/.build_finished ]; then
 else
   rm -rf $zk_dist
   (cd $VTROOT/dist && \
-    wget http://apache.org/dist/zookeeper/zookeeper-$zk_ver/zookeeper-$zk_ver.tar.gz && \
+    curl -sL http://apache.org/dist/zookeeper/zookeeper-$zk_ver/zookeeper-$zk_ver.tar.gz > zookeeper-$zk_ver.tar.gz && \
     tar -xzf zookeeper-$zk_ver.tar.gz && \
     mkdir -p $zk_dist/lib && \
     cp zookeeper-$zk_ver/contrib/fatjar/zookeeper-$zk_ver-fatjar.jar $zk_dist/lib && \
@@ -65,7 +65,7 @@ else
   mkdir -p $etcd_dist
   download_url=https://github.com/coreos/etcd/releases/download
   (cd $etcd_dist && \
-    wget ${download_url}/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz && \
+    curl -sL ${download_url}/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz > etcd-${etcd_version}-linux-amd64.tar.gz && \
     tar xzf etcd-${etcd_version}-linux-amd64.tar.gz)
   [ $? -eq 0 ] || fail "etcd download failed"
   echo "$etcd_version" > $etcd_version_file
@@ -83,7 +83,7 @@ else
   mkdir -p $consul_dist
   download_url=https://releases.hashicorp.com/consul
   (cd $consul_dist && \
-    wget ${download_url}/${consul_version}/consul_${consul_version}_linux_amd64.zip && \
+    curl -sL ${download_url}/${consul_version}/consul_${consul_version}_linux_amd64.zip > consul_${consul_version}_linux_amd64.zip&& \
     unzip consul_${consul_version}_linux_amd64.zip)
   [ $? -eq 0 ] || fail "consul download failed"
   echo "$consul_version" > $consul_version_file
@@ -254,6 +254,7 @@ echo "Installing selenium and chromedriver"
 selenium_dist=$VTROOT/dist/selenium
 mkdir -p $selenium_dist
 $VIRTUALENV $selenium_dist
+ensure_python2
 $selenium_dist/bin/$PIP install selenium
 mkdir -p $VTROOT/dist/chromedriver
 curl -sL http://chromedriver.storage.googleapis.com/2.25/chromedriver_linux64.zip > chromedriver_linux64.zip

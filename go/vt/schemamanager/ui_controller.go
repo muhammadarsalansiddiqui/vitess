@@ -72,6 +72,11 @@ func (controller *UIController) OnReadFail(ctx context.Context, err error) error
 	return err
 }
 
+// ShouldValidate determines whether this controller expects its input to need to be validated
+func (controller *UIController) ShouldValidate(ctx context.Context) bool {
+	return true
+}
+
 // OnValidationSuccess is no-op
 func (controller *UIController) OnValidationSuccess(ctx context.Context) error {
 	controller.writer.Write(

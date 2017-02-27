@@ -519,6 +519,34 @@ func initAPI(ctx context.Context, ts topo.Server, actions *ActionRepository, rea
 			schemamanager.NewUIController(req.SQL, req.Keyspace, w), executor)
 	})
 
+	handleAPI("schema/apply/liquibase", func(w http.ResponseWriter, r *http.Request) error {
+		if err := acl.CheckAccessHTTP(r, acl.ADMIN); err != nil {
+			http.Error(w, "403 Forbidden", http.StatusForbidden)
+			return nil
+		}
+		req := struct {
+			Keyspace, SQL       string
+			SlaveTimeoutSeconds int
+		}{}
+		if err := unmarshalRequest(r, &req); err != nil {
+			return fmt.Errorf("can't unmarshal request: %v", err)
+		}
+		if req.SlaveTimeoutSeconds <= 0 {
+			req.SlaveTimeoutSeconds = 10
+		}
+
+		logger := logutil.NewCallbackLogger(func(ev *logutilpb.Event) {
+			w.Write([]byte(logutil.EventString(ev)))
+		})
+		wr := wrangler.New(logger, ts, tmClient)
+
+		executor := schemamanager.NewTabletExecutor(
+			wr, time.Duration(req.SlaveTimeoutSeconds)*time.Second)
+
+		return schemamanager.Run(ctx,
+			schemamanager.NewLiquibaseController(req.SQL, req.Keyspace, w), executor)
+	})
+
 	// Features
 	handleAPI("features", func(w http.ResponseWriter, r *http.Request) error {
 		if err := acl.CheckAccessHTTP(r, acl.ADMIN); err != nil {

@@ -65,6 +65,11 @@ func (controller *PlainController) OnReadFail(ctx context.Context, err error) er
 	return err
 }
 
+// ShouldValidate determines whether this controller expects its input to need to be validated
+func (controller *PlainController) ShouldValidate(ctx context.Context) bool {
+	return true
+}
+
 // OnValidationSuccess is called when schemamanager successfully validates all sql statements.
 func (controller *PlainController) OnValidationSuccess(ctx context.Context) error {
 	log.Info("Successfully validated all SQL statements.")

@@ -41,6 +41,7 @@ type Controller interface {
 	Keyspace() string
 	OnReadSuccess(ctx context.Context) error
 	OnReadFail(ctx context.Context, err error) error
+	ShouldValidate(ctx context.Context) bool
 	OnValidationSuccess(ctx context.Context) error
 	OnValidationFail(ctx context.Context, err error) error
 	OnExecutorComplete(ctx context.Context, result *ExecuteResult) error
@@ -50,7 +51,7 @@ type Controller interface {
 type Executor interface {
 	Open(ctx context.Context, keyspace string) error
 	Validate(ctx context.Context, sqls []string) error
-	Execute(ctx context.Context, sqls []string) *ExecuteResult
+	Execute(ctx context.Context, controller Controller, sqls []string) *ExecuteResult
 	Close()
 }
 
@@ -103,17 +104,19 @@ func Run(ctx context.Context, controller Controller, executor Executor) error {
 		return err
 	}
 	defer executor.Close()
-	if err := executor.Validate(ctx, sqls); err != nil {
-		log.Errorf("validation fail: %v", err)
-		controller.OnValidationFail(ctx, err)
-		return err
+	if controller.ShouldValidate(ctx) {
+		if err := executor.Validate(ctx, sqls); err != nil {
+			log.Errorf("validation fail: %v", err)
+			controller.OnValidationFail(ctx, err)
+			return err
+		}
+
+		if err := controller.OnValidationSuccess(ctx); err != nil {
+			return err
+		}
 	}
 
-	if err := controller.OnValidationSuccess(ctx); err != nil {
-		return err
-	}
-
-	result := executor.Execute(ctx, sqls)
+	result := executor.Execute(ctx, controller, sqls)
 
 	if err := controller.OnExecutorComplete(ctx, result); err != nil {
 		return err

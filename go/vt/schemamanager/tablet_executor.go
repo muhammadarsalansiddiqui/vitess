@@ -188,7 +188,7 @@ func (exec *TabletExecutor) preflightSchemaChanges(ctx context.Context, sqls []s
 }
 
 // Execute applies schema changes
-func (exec *TabletExecutor) Execute(ctx context.Context, sqls []string) *ExecuteResult {
+func (exec *TabletExecutor) Execute(ctx context.Context, controller Controller, sqls []string) *ExecuteResult {
 	execResult := ExecuteResult{}
 	execResult.Sqls = sqls
 	if exec.isClosed {
@@ -215,10 +215,12 @@ func (exec *TabletExecutor) Execute(ctx context.Context, sqls []string) *Execute
 		}
 	}()
 
-	// Make sure the schema changes introduce a table definition change.
-	if err := exec.preflightSchemaChanges(ctx, sqls); err != nil {
-		execResult.ExecutorErr = err.Error()
-		return &execResult
+	if controller.ShouldValidate(ctx) {
+		// Make sure the schema changes introduce a table definition change.
+		if err := exec.preflightSchemaChanges(ctx, sqls); err != nil {
+			execResult.ExecutorErr = err.Error()
+			return &execResult
+		}
 	}
 
 	for index, sql := range sqls {

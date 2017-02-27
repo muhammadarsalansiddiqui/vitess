@@ -139,6 +139,11 @@ func (controller *LocalController) OnReadFail(ctx context.Context, err error) er
 	return nil
 }
 
+// ShouldValidate determines whether this controller expects its input to need to be validated
+func (controller *LocalController) ShouldValidate(ctx context.Context) bool {
+	return true
+}
+
 // OnValidationSuccess is no-op
 func (controller *LocalController) OnValidationSuccess(ctx context.Context) error {
 	return nil

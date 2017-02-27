@@ -377,6 +377,10 @@ func (controller *fakeController) OnReadFail(ctx context.Context, err error) err
 	return err
 }
 
+func (controller *fakeController) ShouldValidate(ctx context.Context) bool {
+	return true
+}
+
 func (controller *fakeController) OnValidationSuccess(ctx context.Context) error {
 	controller.onValidationSuccessTriggered = true
 	return nil

@@ -138,25 +138,27 @@ func TestTabletExecutorValidate(t *testing.T) {
 }
 
 func TestTabletExecutorExecute(t *testing.T) {
+	controller := newFakeController([]string{"nothing"}, false, false, false)
 	executor := newFakeExecutor()
 	ctx := context.Background()
 
 	sqls := []string{"DROP TABLE unknown_table"}
 
-	result := executor.Execute(ctx, sqls)
+	result := executor.Execute(ctx, controller, sqls)
 	if result.ExecutorErr == "" {
 		t.Fatalf("execute should fail, call execute.Open first")
 	}
 }
 
 func TestTabletExecutorExecute_PreflightWithoutChangesIsAnError(t *testing.T) {
+	controller := newFakeController([]string{"nothing"}, false, false, false)
 	executor := newFakeExecutor()
 	ctx := context.Background()
 	executor.Open(ctx, "test_keyspace")
 	defer executor.Close()
 
 	sqls := []string{"DROP TABLE unknown_table"}
-	result := executor.Execute(ctx, sqls)
+	result := executor.Execute(ctx, controller, sqls)
 	if result.ExecutorErr == "" {
 		t.Fatalf("execute should fail, ddl does not introduce any table schema change")
 	}

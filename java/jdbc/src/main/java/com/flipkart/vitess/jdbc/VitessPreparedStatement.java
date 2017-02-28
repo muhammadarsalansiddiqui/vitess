@@ -118,12 +118,22 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
                     if (vitessConnection.isSimpleExecute()) {
-                        cursor =
-                            vtGateConn.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
-                                .checkedGet();
+                        if (vitessConnection.getSkipV3()) {
+                            cursor = vtGateConn.executeShards(context, sql, vitessConnection.getKeyspace(), vitessConnection.getSkipV3Shards(),
+                                null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                        } else {
+                            cursor =
+                                vtGateConn.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
+                                    .checkedGet();
+                        }
                     } else {
-                        cursor = vtGateConn
-                            .streamExecute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields());
+                        if (vitessConnection.getSkipV3()) {
+                            cursor = vtGateConn.streamExecuteShards(context, sql, vitessConnection.getKeyspace(), vitessConnection.getSkipV3Shards(),
+                                null, tabletType, vitessConnection.getIncludedFields());
+                        } else {
+                            cursor = vtGateConn
+                                .streamExecute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields());
+                        }
                     }
                 } else {
                     VTGateTx vtGateTx = this.vitessConnection.getVtGateTx();
@@ -135,8 +145,13 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                     }
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    cursor = vtGateTx.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
-                        .checkedGet();
+                    if (vitessConnection.getSkipV3()) {
+                        cursor = vtGateTx.executeShards(context, sql, vitessConnection.getKeyspace(), vitessConnection.getSkipV3Shards(),
+                            null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                    } else {
+                        cursor = vtGateTx.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
+                            .checkedGet();
+                    }
                 }
             }
 
@@ -173,8 +188,13 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
         try {
             if (this.vitessConnection.getAutoCommit()) {
                 Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                cursor = vtGateConn.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
-                    .checkedGet();
+                if (vitessConnection.getSkipV3()) {
+                    cursor = vtGateConn.executeShards(context, sql, vitessConnection.getKeyspace(), vitessConnection.getSkipV3Shards(),
+                        null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                } else {
+                    cursor = vtGateConn.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
+                        .checkedGet();
+                }
             } else {
                 VTGateTx vtGateTx = this.vitessConnection.getVtGateTx();
                 if (null == vtGateTx) {
@@ -185,8 +205,14 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                 }
 
                 Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                cursor = vtGateTx.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
-                    .checkedGet();
+                if (vitessConnection.getSkipV3()) {
+                    cursor = vtGateTx.executeShards(context, sql, vitessConnection.getKeyspace(), vitessConnection.getSkipV3Shards(),
+                        null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                } else {
+                    cursor = vtGateTx.execute(context, this.sql, this.bindVariables, tabletType, vitessConnection.getIncludedFields())
+                        .checkedGet();
+                }
+
             }
 
             if (null == cursor) {

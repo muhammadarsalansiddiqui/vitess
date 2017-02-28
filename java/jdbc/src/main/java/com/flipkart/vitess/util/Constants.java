@@ -104,6 +104,8 @@ public class Constants {
         public static final String USERNAME = "userName";
         public static final String EXECUTE_TYPE = "executeType";
         public static final String TWOPC_ENABLED = "twopcEnabled";
+        public static final String SKIP_V3 = "skipV3";
+        public static final String SKIP_V3_SHARDS = "skipV3Shards";
 
         public static final String USE_SSL = "useSSL";
         public static final String KEYSTORE = "keyStore";

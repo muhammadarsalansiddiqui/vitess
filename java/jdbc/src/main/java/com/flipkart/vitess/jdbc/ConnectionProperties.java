@@ -2,6 +2,7 @@ package com.flipkart.vitess.jdbc;
 
 import com.flipkart.vitess.util.Constants;
 import com.flipkart.vitess.util.StringUtils;
+import com.google.common.base.Function;
 import com.youtube.vitess.proto.Query;
 import com.youtube.vitess.proto.Topodata;
 
@@ -11,6 +12,8 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 public class ConnectionProperties {
@@ -92,6 +95,16 @@ public class ConnectionProperties {
         Constants.Property.TABLET_TYPE,
         "Tablet Type to which Vitess will connect(master, replica, rdonly)",
         Constants.DEFAULT_TABLET_TYPE);
+    private BooleanConnectionProperty skipV3 = new BooleanConnectionProperty(
+        Constants.Property.SKIP_V3,
+        "If enabled, the JDBC will skip the V3 API of VTGate, and instead run ExecuteShards using the old API. This means all queries will hit all shards for a keyspace, and queries will not be parsed",
+        false);
+    private ListConnectionProperty<String> skipV3Shards = new ListConnectionProperty<>(
+        Constants.Property.SKIP_V3_SHARDS,
+        "If skipV3 is enabled, use this configuration to specify which shards queries will be executed against as a comma-separated list of integers. I.E. 0,1",
+        Collections.singletonList("0"),
+        null
+    );
 
     // TLS-related configs
     private BooleanConnectionProperty useSSL = new BooleanConnectionProperty(
@@ -318,6 +331,7 @@ public class ConnectionProperties {
         this.tabletTypeCache = this.tabletType.getValueAsEnum();
     }
 
+<<<<<<< HEAD
     public boolean getUseSSL() {
         return useSSL.getValueAsBoolean();
     }
@@ -348,6 +362,22 @@ public class ConnectionProperties {
 
     public String getTrustAlias() {
         return trustAlias.getValueAsString();
+    }
+
+    public boolean getSkipV3() {
+        return this.skipV3.getValueAsBoolean();
+    }
+
+    public void setSkipV3(boolean skipV3) {
+        this.skipV3.setValue(skipV3);
+    }
+
+    public List<String> getSkipV3Shards() {
+        return this.skipV3Shards.getValueAsList();
+    }
+
+    public void setSkipV3Shards(List<String> shards) {
+        this.skipV3Shards.setValue(shards);
     }
 
     abstract static class ConnectionProperty {
@@ -496,6 +526,45 @@ public class ConnectionProperties {
 
         T getValueAsEnum() {
             return (T) valueAsObject;
+        }
+    }
+
+    private static class ListConnectionProperty<T> extends ConnectionProperty {
+
+        private final Function<String, T> valueConverter;
+
+        private ListConnectionProperty(String name, String description, List<T> defaultValue, Function<String, T> valueConverter) {
+            super(name, description, defaultValue);
+            this.valueConverter = valueConverter;
+        }
+
+        @Override
+        void initializeFrom(String extractedValue) {
+            if (extractedValue == null) {
+                this.valueAsObject = this.defaultValue;
+                return;
+            }
+
+            String[] parts = extractedValue.split(",");
+            List<T> list = new ArrayList<>(parts.length);
+            for (int i  = 0; i < parts.length; i++) {
+                list.add(i, valueConverter == null ? (T) parts[i] : valueConverter.apply(parts[i]));
+            }
+
+            setValue(list);
+        }
+
+        public void setValue(List<T> value) {
+            this.valueAsObject = value;
+        }
+
+        @Override
+        String[] getAllowableValues() {
+            return new String[0];
+        }
+
+        List<T> getValueAsList() {
+            return (List<T>) valueAsObject;
         }
     }
 }

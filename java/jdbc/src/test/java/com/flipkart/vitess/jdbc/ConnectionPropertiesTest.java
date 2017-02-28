@@ -15,7 +15,7 @@ import java.util.Properties;
 
 public class ConnectionPropertiesTest {
 
-    private static final int NUM_PROPS = 20;
+    private static final int NUM_PROPS = 22;
 
     @Test
     public void testReflection() throws Exception {

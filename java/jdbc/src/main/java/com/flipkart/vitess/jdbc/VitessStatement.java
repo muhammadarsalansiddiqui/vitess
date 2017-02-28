@@ -394,7 +394,7 @@ public class VitessStatement implements Statement {
             }
         }
 
-        return new VitessResultSet(columnNames, columnTypes, data);
+        return new VitessResultSet(columnNames, columnTypes, data, this.vitessConnection);
     }
 
     /**

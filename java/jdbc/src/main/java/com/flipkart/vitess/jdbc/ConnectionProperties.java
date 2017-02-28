@@ -331,7 +331,6 @@ public class ConnectionProperties {
         this.tabletTypeCache = this.tabletType.getValueAsEnum();
     }
 
-<<<<<<< HEAD
     public boolean getUseSSL() {
         return useSSL.getValueAsBoolean();
     }

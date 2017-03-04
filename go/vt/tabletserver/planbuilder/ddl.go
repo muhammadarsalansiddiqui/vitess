@@ -8,9 +8,10 @@ import "github.com/youtube/vitess/go/vt/sqlparser"
 
 // DDLPlan provides a plan for DDLs.
 type DDLPlan struct {
-	Action    string
-	TableName *sqlparser.TableName
-	NewName   *sqlparser.TableName
+	Action          string
+	TableName       *sqlparser.TableName
+	NewName         *sqlparser.TableName
+	TableOperations []sqlparser.TableOperation
 }
 
 // DDLParse parses a DDL and produces a DDLPlan.
@@ -24,9 +25,10 @@ func DDLParse(sql string) (plan *DDLPlan) {
 		return &DDLPlan{Action: ""}
 	}
 	return &DDLPlan{
-		Action:    stmt.Action,
-		TableName: stmt.Table,
-		NewName:   stmt.NewName,
+		Action:          stmt.Action,
+		TableName:       stmt.Table,
+		NewName:         stmt.NewName,
+		TableOperations: stmt.TableOperations,
 	}
 }
 

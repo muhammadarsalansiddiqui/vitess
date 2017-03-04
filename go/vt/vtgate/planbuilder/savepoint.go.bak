@@ -1,0 +1,19 @@
+package planbuilder
+
+import (
+	"github.com/youtube/vitess/go/vt/sqlparser"
+	"github.com/youtube/vitess/go/vt/vtgate/engine"
+)
+
+func buildSavepointPlan(spt *sqlparser.Savepoint, vschema VSchema) (primitive engine.Primitive, err error) {
+
+	builder, err := processSavepoint(spt, vschema)
+	if err != nil {
+		return nil, err
+	}
+	return builder.Primitive(), nil
+}
+
+func processSavepoint(spt *sqlparser.Savepoint, vschema VSchema) (builder, error) {
+
+}

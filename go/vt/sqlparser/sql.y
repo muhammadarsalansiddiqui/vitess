@@ -67,6 +67,8 @@ func forceEOF(yylex interface{}) {
   tableIdent  TableIdent
   convertType *ConvertType
   aliasedTableName *AliasedTableExpr
+  tableOperation   TableOperation
+  tableOperations  []TableOperation
 }
 
 %token LEX_ERROR
@@ -189,6 +191,8 @@ func forceEOF(yylex interface{}) {
 %type <empty> force_eof ddl_force_eof
 %type <str> charset
 %type <convertType> convert_type
+%type <tableOperation> rename_operation
+%type <tableOperations> rename_operations
 
 %start any_command
 
@@ -291,7 +295,7 @@ alter_statement:
 | ALTER ignore_opt TABLE table_name RENAME to_opt table_name
   {
     // Change this to a rename statement
-    $$ = &DDL{Action: RenameStr, Table: $4, NewName: $7}
+    $$ = &DDL{Action: RenameStr, TableOperations:[]TableOperation{{Operator: ToStr, Table: $4, NewName: $7}}}
   }
 | ALTER VIEW table_name ddl_force_eof
   {
@@ -299,9 +303,25 @@ alter_statement:
   }
 
 rename_statement:
-  RENAME TABLE table_name TO table_name
+  RENAME TABLE rename_operations
   {
-    $$ = &DDL{Action: RenameStr, Table: $3, NewName: $5}
+    $$ = &DDL{Action: RenameStr, TableOperations: $3}
+  }
+
+rename_operations:
+  rename_operation
+  {
+    $$ = []TableOperation{$1}
+  }
+| rename_operations ',' rename_operation
+  {
+    $$ = append($$, $3)
+  }
+
+rename_operation:
+  table_name TO table_name
+  {
+    $$ = TableOperation{Table: $1, Operator: ToStr, NewName: $3}
   }
 
 drop_statement:

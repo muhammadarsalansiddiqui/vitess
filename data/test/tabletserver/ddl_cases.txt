@@ -40,27 +40,27 @@
 
 "rename table a to b"
 {
-  "Action": "rename", "TableName": "a", "NewTable": "b"
+  "Action": "rename", "TableOperations": [{"Operator": "to", "TableName": "a", "NewTable": "b"}]
 }
 
 "rename table c.a to c.b"
 {
-  "Action": "rename", "TableName": "c.a", "NewTable": "c.b"
+  "Action": "rename", "TableOperations": [{"Operator": "to", "TableName": "c.a", "NewTable": "c.b"}]
 }
 
 "alter table a rename b"
 {
-  "Action": "rename", "TableName": "a", "NewTable": "b"
+  "Action": "rename", "TableOperations": [{"Operator": "to", "TableName": "a", "NewTable": "b"}]
 }
 
 "alter table a rename to b"
 {
-  "Action": "rename", "TableName": "a", "NewTable": "b"
+  "Action": "rename", "TableOperations": [{"Operator": "to", "TableName": "a", "NewTable": "b"}]
 }
 
 "alter table c.a rename to c.b"
 {
-  "Action": "rename", "TableName": "c.a", "NewTable": "c.b"
+  "Action": "rename", "TableOperations": [{"Operator": "to", "TableName": "c.a", "NewTable": "c.b"}]
 }
 
 "create view a asdasd"

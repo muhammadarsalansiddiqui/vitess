@@ -391,10 +391,11 @@ func (node *Set) WalkSubtree(visit Visit) error {
 // Table is set for AlterStr, DropStr, RenameStr.
 // NewName is set for AlterStr, CreateStr, RenameStr.
 type DDL struct {
-	Action   string
-	Table    *TableName
-	NewName  *TableName
-	IfExists bool
+	Action          string
+	Table           *TableName
+	NewName         *TableName
+	IfExists        bool
+	TableOperations []TableOperation
 }
 
 // DDL strings.
@@ -417,7 +418,12 @@ func (node *DDL) Format(buf *TrackedBuffer) {
 		}
 		buf.Myprintf("%s table%s %v", node.Action, exists, node.Table)
 	case RenameStr:
-		buf.Myprintf("%s table %v %v", node.Action, node.Table, node.NewName)
+		buf.Myprintf("%s table ", node.Action, node.Table, node.NewName)
+		var prefix string
+		for _, n := range node.TableOperations {
+			buf.Myprintf("%s%v", prefix, n)
+			prefix = ", "
+		}
 	default:
 		buf.Myprintf("%s table %v", node.Action, node.Table)
 	}
@@ -428,6 +434,45 @@ func (node *DDL) WalkSubtree(visit Visit) error {
 	if node == nil {
 		return nil
 	}
+	err := Walk(
+		visit,
+		node.Table,
+		node.NewName,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	for _, n := range node.TableOperations {
+		if err := Walk(visit, n); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// TableOperation strings
+const (
+	ToStr = "to"
+)
+
+// TableOperation represents a single table operation in a multi-table DDL,
+// such as `rename table a to b, c to d`
+type TableOperation struct {
+	Operator string
+	Table    *TableName
+	NewName  *TableName
+}
+
+// Format formats the node.
+func (node TableOperation) Format(buf *TrackedBuffer) {
+	buf.Myprintf("%v %s %v", node.Table, node.Operator, node.NewName)
+}
+
+// WalkSubtree walks the nodes of the subtree.
+func (node TableOperation) WalkSubtree(visit Visit) error {
 	return Walk(
 		visit,
 		node.Table,

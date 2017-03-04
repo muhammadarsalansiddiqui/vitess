@@ -125,11 +125,25 @@ func TestDDLPlan(t *testing.T) {
 		expected := make(map[string]interface{})
 		err := json.Unmarshal([]byte(tcase.output), &expected)
 		if err != nil {
-			t.Fatalf("Error marshalling %v", plan)
+			t.Fatalf("Error marshalling %v: %v", plan, err)
 		}
 		matchString(t, tcase.lineno, expected["Action"], plan.Action)
-		matchString(t, tcase.lineno, expected["TableName"], sqlparser.String(plan.TableName))
-		matchString(t, tcase.lineno, expected["NewName"], sqlparser.String(plan.NewName))
+		if ops, ok := expected["TableOperations"]; ok {
+			items := ops.([]interface{})
+			for idx, item := range items {
+				op := item.(map[string]interface{})
+				matchString(t, tcase.lineno, op["Operator"], plan.TableOperations[idx].Operator)
+				matchString(t, tcase.lineno, op["TableName"], plan.TableOperations[idx].Operator)
+				matchString(t, tcase.lineno, op["NewName"], plan.TableOperations[idx].Operator)
+			}
+
+		}
+		if val, ok := expected["TableName"]; ok {
+			matchString(t, tcase.lineno, val, sqlparser.String(plan.TableName))
+		}
+		if val, ok := expected["NewName"]; ok {
+			matchString(t, tcase.lineno, val, sqlparser.String(plan.NewName))
+		}
 	}
 }
 

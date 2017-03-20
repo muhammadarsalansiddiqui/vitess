@@ -1,12 +1,5 @@
 package io.vitess.jdbc;
 
-import io.vitess.client.Context;
-import io.vitess.client.RpcClient;
-import io.vitess.client.VTGateConn;
-import io.vitess.client.grpc.GrpcClientFactory;
-import io.vitess.client.grpc.tls.TlsOptions;
-import io.vitess.util.CommonUtils;
-import io.vitess.util.Constants;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -14,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.vitess.client.Context;
+import io.vitess.client.RpcClient;
+import io.vitess.client.VTGateConn;
+import io.vitess.client.grpc.GrpcClientFactory;
+import io.vitess.client.grpc.tls.TlsOptions;
+import io.vitess.util.CommonUtils;
+import io.vitess.util.Constants;
 
 /**
  * Created by naveen.nahata on 24/02/16.
@@ -107,7 +108,7 @@ public class VitessVTGateManager {
      */
     private static VTGateConn getVtGateConn(String hostname, int port, VitessConnection connection) {
         final String username = connection.getUsername();
-        final String keyspace = connection.getKeyspace();
+        final String keyspace = connection.getKeyspaceShard();
         final Context context = CommonUtils.createContext(username, Constants.CONNECTION_TIMEOUT);
         final InetSocketAddress inetSocketAddress = new InetSocketAddress(hostname, port);
         RpcClient client;

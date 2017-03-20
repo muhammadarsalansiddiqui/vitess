@@ -16,19 +16,21 @@
 
 package io.vitess.example;
 
+import java.util.Map;
+import java.util.Random;
+
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
+
 import io.vitess.client.Context;
 import io.vitess.client.RpcClient;
 import io.vitess.client.VTGateBlockingConnection;
 import io.vitess.client.cursor.Cursor;
 import io.vitess.client.cursor.Row;
 import io.vitess.client.grpc.GrpcClientFactory;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
-
-import java.util.Map;
-import java.util.Random;
 
 /**
  * VitessClientExample.java is a sample for using the Vitess low-level Java Client.
@@ -81,6 +83,7 @@ public class VitessClientExample {
                     System.out.format("(%s, %s, %s)\n", page, timeCreated, new String(message));
                 }
             }
+
         } catch (Exception e) {
             System.out.println("Vitess Java example failed.");
             System.out.println("Error Details:");

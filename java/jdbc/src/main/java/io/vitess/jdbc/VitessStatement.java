@@ -20,10 +20,12 @@ import java.sql.BatchUpdateException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLNonTransientException;
 import java.sql.SQLRecoverableException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -38,6 +40,7 @@ import io.vitess.proto.Topodata;
 import io.vitess.proto.Vtrpc;
 import io.vitess.util.Constants;
 import io.vitess.util.StringUtils;
+
 
 /**
  * Created by harshit.gangal on 19/01/16.
@@ -120,7 +123,7 @@ public class VitessStatement implements Statement {
                 Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
                 if (vitessConnection.isSimpleExecute() && this.fetchSize == 0) {
-                    cursor = vtGateConn.execute(context, sql, null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                    cursor = vtGateConn.execute(context, sql, null, tabletType, vitessConnection.getIncludedFields(), vitessConnection.getSession()).checkedGet();
                 } else {
                     cursor = vtGateConn.streamExecute(context, sql, null, tabletType, vitessConnection.getIncludedFields());
                 }
@@ -431,13 +434,13 @@ public class VitessStatement implements Statement {
         try {
             if (this.vitessConnection.getAutoCommit()) {
                 Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                cursor = vtGateConn.execute(context, sql, null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                cursor = vtGateConn.execute(context, sql, null, tabletType, vitessConnection.getIncludedFields(), vitessConnection.getSession()).checkedGet();
             } else {
                 vtGateTx = this.vitessConnection.getVtGateTx();
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getIsSingleShard()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 
@@ -570,13 +573,13 @@ public class VitessStatement implements Statement {
             if (this.vitessConnection.getAutoCommit()) {
                 Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
                 cursorWithErrorList =
-                    vtGateConn.executeBatch(context, batchedArgs, null, tabletType, vitessConnection.getIncludedFields()).checkedGet();
+                    vtGateConn.executeBatch(context, batchedArgs, null, tabletType, vitessConnection.getIncludedFields(), vitessConnection.getSession()).checkedGet();
             } else {
                 vtGateTx = this.vitessConnection.getVtGateTx();
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getIsSingleShard()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 
@@ -632,6 +635,29 @@ public class VitessStatement implements Statement {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * This method will execute Show Queries
+     *
+     * @param sql - Sql as input parameter
+     * @return Cursor
+     * @throws SQLException
+     */
+    protected Cursor executeShow(String sql) throws SQLException {
+        String keyspace = this.vitessConnection.getKeyspaceShard();
+        if (null == keyspace) {
+            throw new SQLNonTransientException(Constants.SQLExceptionMessages.NO_KEYSPACE);
+        }
+        //To Hit any single shard
+        List<byte[]> keyspaceIds = Arrays.asList(new byte[] {1});
+        Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
+        return this.vitessConnection.getVtGateConn()
+            .executeKeyspaceIds(context, sql, keyspace, keyspaceIds, null,
+                this.vitessConnection.getTabletType(), vitessConnection.getIncludedFields(), vitessConnection.getSession()).checkedGet();
+    }
+
+    /**
+>>>>>>> Support for new vtgate autocommit and shard targetting
      * This method returns the updateCounts array containing the status for each query
      * sent in the batch. If any of the query does return success.
      * It throws a BatchUpdateException.

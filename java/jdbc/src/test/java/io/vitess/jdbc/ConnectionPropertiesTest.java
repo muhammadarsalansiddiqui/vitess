@@ -16,17 +16,18 @@
 
 package io.vitess.jdbc;
 
-import io.vitess.proto.Query;
-import io.vitess.proto.Topodata;
-import io.vitess.util.Constants;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Properties;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import io.vitess.proto.Query;
+import io.vitess.proto.Topodata;
+import io.vitess.util.Constants;
 
 public class ConnectionPropertiesTest {
 
@@ -278,5 +279,29 @@ public class ConnectionPropertiesTest {
         info.setProperty(Constants.Property.TARGET, "dummy");
         props.initializeProperties(info);
         Assert.assertEquals("target", "dummy", props.getTarget());
+    }
+
+    @Test
+    public void testDbNameDefaultToKeyspace() throws SQLException {
+        ConnectionProperties props = new ConnectionProperties();
+        props.initializeProperties(new Properties());
+        Assert.assertEquals(null, props.getDbName());
+        props.setKeyspaceShard("test");
+        Assert.assertEquals("test", props.getDbName());
+    }
+
+    @Test
+    public void testIsSingleShard() throws SQLException {
+        ConnectionProperties props = new ConnectionProperties();
+        Properties info = new Properties();
+        info.setProperty(Constants.Property.KEYSPACE, "test/0");
+        props.initializeProperties(info);
+        Assert.assertEquals(true, props.getIsSingleShard());
+        props = new ConnectionProperties();
+        info.setProperty(Constants.Property.KEYSPACE, "test");
+        props.initializeProperties(info);
+        Assert.assertEquals(false, props.getIsSingleShard());
+        props.setKeyspaceShard("test/0");
+        Assert.assertEquals(true, props.getIsSingleShard());
     }
 }

@@ -16,11 +16,6 @@
 
 package io.vitess.jdbc;
 
-import io.vitess.proto.Query;
-import io.vitess.proto.Topodata;
-import io.vitess.util.Constants;
-import io.vitess.util.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.sql.DriverPropertyInfo;
@@ -30,9 +25,14 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import io.vitess.proto.Query;
+import io.vitess.proto.Topodata;
+import io.vitess.util.Constants;
+import io.vitess.util.StringUtils;
+
 public class ConnectionProperties {
 
-    private static final ArrayList<java.lang.reflect.Field> PROPERTY_LIST = new ArrayList<>();
+    private static final ArrayList<Field> PROPERTY_LIST = new ArrayList<>();
 
     static {
         try {
@@ -48,6 +48,27 @@ public class ConnectionProperties {
             throw new RuntimeException(ex);
         }
     }
+
+    private StringConnectionProperty username = new StringConnectionProperty(
+        Constants.Property.USERNAME,
+        Constants.USERNAME_DESC,
+        null,
+        null
+    );
+
+    private StringConnectionProperty keyspaceShard = new StringConnectionProperty(
+        Constants.Property.KEYSPACE,
+        Constants.VITESS_KEYSPACE,
+        null,
+        null
+    );
+
+    private StringConnectionProperty dbName = new StringConnectionProperty(
+        Constants.Property.DBNAME,
+        Constants.VITESS_DB_NAME,
+        null,
+        null
+    );
 
     // Configs for handling deserialization of blobs
     private BooleanConnectionProperty blobsAreStrings = new BooleanConnectionProperty(
@@ -208,6 +229,9 @@ public class ConnectionProperties {
         true);
 
     // Caching of some hot properties to avoid casting over and over
+    private String usernameCache;
+    private String keyspaceCache;
+    private boolean isSingleShardCache;
     private Topodata.TabletType tabletTypeCache;
     private Query.ExecuteOptions.IncludedFields includedFieldsCache;
     private boolean includeAllFieldsCache = true;
@@ -231,6 +255,9 @@ public class ConnectionProperties {
     }
 
     private void postInitialization() {
+        this.usernameCache = this.username.getValueAsString();
+        this.keyspaceCache = this.keyspaceShard.getValueAsString();
+        this.isSingleShardCache = detectSingleShard(this.keyspaceCache);
         this.tabletTypeCache = this.tabletType.getValueAsEnum();
         this.includedFieldsCache = this.includedFields.getValueAsEnum();
         this.includeAllFieldsCache = this.includedFieldsCache == Query.ExecuteOptions.IncludedFields.ALL;
@@ -238,6 +265,10 @@ public class ConnectionProperties {
         this.simpleExecuteTypeCache = this.executeType.getValueAsEnum() == Constants.QueryExecuteType.SIMPLE;
         this.characterEncodingAsString = this.characterEncoding.getValueAsString();
         this.userNameCache = this.userName.getValueAsString();
+    }
+
+    private boolean detectSingleShard(String keyspaceShard) {
+        return keyspaceShard != null && keyspaceShard.contains("/");
     }
 
     /**
@@ -278,6 +309,32 @@ public class ConnectionProperties {
             }
         }
         return driverProperties;
+    }
+
+    public String getKeyspaceShard() {
+        return keyspaceCache;
+    }
+
+    public void setKeyspaceShard(String keyspaceShard) {
+        this.keyspaceShard.setValue(keyspaceShard);
+        this.keyspaceCache = keyspaceShard;
+        this.isSingleShardCache = detectSingleShard(this.keyspaceCache);
+    }
+
+    public boolean getIsSingleShard() {
+        return isSingleShardCache;
+    }
+
+    public String getDbName() {
+        String dbName = this.dbName.getValueAsString();
+        if (dbName != null) {
+            return dbName;
+        }
+        return getKeyspaceShard();
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName.setValue(dbName);
     }
 
     public boolean getBlobsAreStrings() {

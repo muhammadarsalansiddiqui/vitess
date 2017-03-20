@@ -16,8 +16,6 @@
 
 package io.vitess.jdbc;
 
-import io.vitess.util.Constants;
-
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -26,6 +24,8 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import io.vitess.util.Constants;
 
 /**
  * VitessDriver is the official JDBC driver for Vitess.
@@ -109,7 +109,6 @@ public class VitessDriver implements Driver {
                 (new Integer(vitessJDBCUrl.getHostInfos().get(0).getPort())).toString());
             dpi[1].required = false;
             dpi[1].description = Constants.VITESS_PORT;
-
         } else {
             throw new SQLException(Constants.SQLExceptionMessages.INVALID_CONN_URL + " : " + url);
         }

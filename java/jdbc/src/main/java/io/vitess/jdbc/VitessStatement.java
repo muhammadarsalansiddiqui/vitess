@@ -41,7 +41,6 @@ import io.vitess.proto.Vtrpc;
 import io.vitess.util.Constants;
 import io.vitess.util.StringUtils;
 
-
 /**
  * Created by harshit.gangal on 19/01/16.
  * <p>

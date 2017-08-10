@@ -471,11 +471,11 @@ public final class VTGateConn implements Closeable {
     return new StreamCursor(client.streamExecuteKeyRanges(ctx, requestBuilder.build()));
   }
 
-  public SQLFuture<VTGateTx> begin(Context ctx) throws SQLException {
-    return begin(ctx, false);
+  public SQLFuture<VTGateTx> begin(Context ctx, Vtgate.Session session) throws SQLException {
+    return begin(ctx, session,false);
   }
 
-  public SQLFuture<VTGateTx> begin(Context ctx, boolean singleDB) throws SQLException {
+  public SQLFuture<VTGateTx> begin(Context ctx, final Vtgate.Session session, boolean singleDB) throws SQLException {
     BeginRequest.Builder requestBuilder = BeginRequest.newBuilder().setSingleDb(singleDB);
     if (ctx.getCallerId() != null) {
       requestBuilder.setCallerId(ctx.getCallerId());
@@ -487,7 +487,7 @@ public final class VTGateConn implements Closeable {
               @Override
               public ListenableFuture<VTGateTx> apply(BeginResponse response) throws Exception {
                 return Futures.<VTGateTx>immediateFuture(
-                    new VTGateTx(client, response.getSession(), keyspaceShard));
+                    new VTGateTx(client, response.getSession().toBuilder().setOptions(session.getOptions()).build(), keyspaceShard));
               }
             },
             directExecutor()));

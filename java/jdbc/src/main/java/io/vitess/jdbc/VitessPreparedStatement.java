@@ -141,7 +141,7 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                 if (vtGateTx == null) {
                     Context context =
                             this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
                 Context context =
@@ -191,7 +191,7 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context, vitessConnection.getIsSingleShard()).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession(), vitessConnection.getIsSingleShard()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 
@@ -462,7 +462,7 @@ public class VitessPreparedStatement extends VitessStatement implements Prepared
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context, vitessConnection.getIsSingleShard()).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession(), vitessConnection.getIsSingleShard()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 

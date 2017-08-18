@@ -87,7 +87,7 @@ import io.vitess.util.Constants;
         SQLFuture mockSqlFutureCursor = PowerMockito.mock(SQLFuture.class);
         SQLFuture mockSqlFutureVtGateTx = PowerMockito.mock(SQLFuture.class);
 
-        PowerMockito.when(mockConn.getKeyspaceShard()).thenReturn("test_keyspace");
+        PowerMockito.when(mockConn.getKeyspace()).thenReturn("test_keyspace");
         PowerMockito.when(mockConn.getVtGateConn()).thenReturn(mockVtGateConn);
         PowerMockito.when(mockConn.getVtGateTx()).thenReturn(mockVtGateTx);
         PowerMockito.when(mockVtGateTx
@@ -102,8 +102,6 @@ import io.vitess.util.Constants;
                 Matchers.any(Topodata.TabletType.class), Matchers.any(Query.ExecuteOptions.IncludedFields.class), Matchers.any(Vtgate.Session.class))).thenReturn(mockSqlFutureCursor);
         PowerMockito.when(mockConn.getExecuteType())
             .thenReturn(Constants.QueryExecuteType.SIMPLE);
-        PowerMockito.when(mockConn.getIsSingleShard())
-            .thenReturn(false);
         PowerMockito.when(mockConn.isSimpleExecute()).thenReturn(true);
         PowerMockito.when(mockSqlFutureCursor.checkedGet()).thenReturn(mockCursor);
         PowerMockito.when(mockSqlFutureVtGateTx.checkedGet()).thenReturn(mockVtGateTx);
@@ -132,7 +130,7 @@ import io.vitess.util.Constants;
             //select on master when tx is null and autocommit is false
             PowerMockito.when(mockConn.getTabletType()).thenReturn(Topodata.TabletType.MASTER);
             PowerMockito.when(mockConn.getVtGateTx()).thenReturn(null);
-            PowerMockito.when(mockVtGateConn.begin(Matchers.any(Context.class), Matchers.any(Vtgate.Session.class), Matchers.eq(false)))
+            PowerMockito.when(mockVtGateConn.begin(Matchers.any(Context.class), Matchers.any(Vtgate.Session.class)))
                 .thenReturn(mockSqlFutureVtGateTx);
             PowerMockito.when(mockConn.getAutoCommit()).thenReturn(false);
             rs = statement.executeQuery(sqlSelect);
@@ -160,7 +158,7 @@ import io.vitess.util.Constants;
         SQLFuture mockSqlFutureCursor = PowerMockito.mock(SQLFuture.class);
         SQLFuture mockSqlFutureVtGateTx = PowerMockito.mock(SQLFuture.class);
 
-        PowerMockito.when(mockConn.getKeyspaceShard()).thenReturn("test_keyspace");
+        PowerMockito.when(mockConn.getKeyspace()).thenReturn("test_keyspace");
         PowerMockito.when(mockConn.getVtGateConn()).thenReturn(mockVtGateConn);
         PowerMockito.when(mockConn.getVtGateTx()).thenReturn(mockVtGateTx);
         PowerMockito.when(mockVtGateTx
@@ -175,8 +173,6 @@ import io.vitess.util.Constants;
                 Matchers.any(Topodata.TabletType.class), Matchers.any(Query.ExecuteOptions.IncludedFields.class), Matchers.any(Vtgate.Session.class))).thenReturn(mockSqlFutureCursor);
         PowerMockito.when(mockConn.getExecuteType())
             .thenReturn(Constants.QueryExecuteType.STREAM);
-        PowerMockito.when(mockConn.getIsSingleShard())
-            .thenReturn(false);
         PowerMockito.when(mockSqlFutureCursor.checkedGet()).thenReturn(mockCursor);
         PowerMockito.when(mockSqlFutureVtGateTx.checkedGet()).thenReturn(mockVtGateTx);
         PowerMockito.when(mockCursor.getFields()).thenReturn(Query.QueryResult.getDefaultInstance().getFieldsList());
@@ -204,7 +200,7 @@ import io.vitess.util.Constants;
             //select on master when tx is null and autocommit is false
             PowerMockito.when(mockConn.getTabletType()).thenReturn(Topodata.TabletType.MASTER);
             PowerMockito.when(mockConn.getVtGateTx()).thenReturn(null);
-            PowerMockito.when(mockVtGateConn.begin(Matchers.any(Context.class), Matchers.any(Vtgate.Session.class), Matchers.eq(false)))
+            PowerMockito.when(mockVtGateConn.begin(Matchers.any(Context.class), Matchers.any(Vtgate.Session.class)))
                 .thenReturn(mockSqlFutureVtGateTx);
             PowerMockito.when(mockConn.getAutoCommit()).thenReturn(false);
             rs = statement.executeQuery(sqlSelect);
@@ -373,7 +369,7 @@ import io.vitess.util.Constants;
         SQLFuture mockSqlFutureVtGateTx = PowerMockito.mock(SQLFuture.class);
         List<Query.Field> mockFieldList = PowerMockito.spy(new ArrayList<Query.Field>());
 
-        PowerMockito.when(mockConn.getKeyspaceShard()).thenReturn("test_keyspace");
+        PowerMockito.when(mockConn.getKeyspace()).thenReturn("test_keyspace");
         PowerMockito.when(mockConn.getVtGateConn()).thenReturn(mockVtGateConn);
         PowerMockito.when(mockConn.getTabletType()).thenReturn(Topodata.TabletType.MASTER);
         PowerMockito.when(mockVtGateConn

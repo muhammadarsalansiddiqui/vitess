@@ -165,11 +165,6 @@ public class VitessJDBCUrlTest {
         Assert.assertEquals("catalog", vitessJDBCUrl.getProperties().getProperty(Constants.Property.DBNAME));
         Assert.assertEquals("val1", vitessJDBCUrl.getProperties().getProperty("prop1"));
         Assert.assertEquals("val2", vitessJDBCUrl.getProperties().getProperty("prop2"));
-        ConnectionProperties properties = new ConnectionProperties();
-        properties.initializeProperties(vitessJDBCUrl.getProperties());
-        Assert.assertEquals("user", properties.getUsername());
-        Assert.assertEquals("keyspace", properties.getKeyspaceShard());
-        Assert.assertEquals("catalog", properties.getDbName());
     }
 
     @Test public void testLeaveOriginalPropertiesAlone() throws Exception {

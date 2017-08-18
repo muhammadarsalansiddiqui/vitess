@@ -44,8 +44,7 @@ public class Constants {
     public static final int MAX_BUFFER_SIZE = 65535;
     //Default Timeout in miliseconds
     public static final int DEFAULT_TIMEOUT = 30000;
-    public static final String SQL_SHOW = "show";
-    public static final String VITESS_KEYSPACE = "Keyspace name in Vitess Server, with optional shard separated by /";
+    public static final String VITESS_KEYSPACE = "Keyspace name in Vitess Server";
     public static final Constants.QueryExecuteType DEFAULT_EXECUTE_TYPE = QueryExecuteType.SIMPLE;
     public static final String EXECUTE_TYPE_DESC = "Query execution type: simple or stream \n";
     public static final String USERNAME_DESC = "Username used for ACL validation \n";

@@ -90,11 +90,11 @@ public class VTGateConn implements Closeable {
   private final String keyspaceShard;
 
   /**
-   * Creates a VTGateConn with no default keyspaceShard.
-   * 
+   * Creates a VTGateConn with no default keyspace.
+   *
    * <p>
    * In this mode, methods like {@code execute()} and {@code streamExecute()} that don't have a
-   * per-call {@code keyspaceShard} parameter will use VSchema to resolve the keyspaceShard for any unprefixed
+   * per-call {@code keyspace} parameter will use VSchema to resolve the keyspaceShard for any unprefixed
    * table names. Note that this only works if the table name is unique across all keyspaces.
    */
   public VTGateConn(RpcClient client) {

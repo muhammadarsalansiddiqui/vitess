@@ -32,11 +32,9 @@ import java.util.Enumeration;
 
 import javax.net.ssl.SSLException;
 
-import io.grpc.internal.DnsNameResolverProvider;
 import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
-import io.grpc.util.RoundRobinLoadBalancerFactory;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.vitess.client.Context;
@@ -70,7 +68,7 @@ public class GrpcClientFactory implements RpcClientFactory {
   @Override
   public RpcClient create(Context ctx, String target) {
     return new GrpcClient(
-            NettyChannelBuilder.forTarget(target).nameResolverFactory(DnsNameResolverProvider.asFactory()).loadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()).negotiationType(NegotiationType.PLAINTEXT).intercept(new RetryingInterceptor(config)).build());
+            NettyChannelBuilder.forTarget(target).negotiationType(NegotiationType.PLAINTEXT).intercept(new RetryingInterceptor(config)).build());
   }
 
   /**
@@ -124,7 +122,7 @@ public class GrpcClientFactory implements RpcClientFactory {
     }
 
     return new GrpcClient(
-        NettyChannelBuilder.forTarget(target).nameResolverFactory(DnsNameResolverProvider.asFactory()).loadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()).negotiationType(NegotiationType.TLS).sslContext(sslContext).intercept(new RetryingInterceptor(config)).build());
+        NettyChannelBuilder.forTarget(target).negotiationType(NegotiationType.TLS).sslContext(sslContext).intercept(new RetryingInterceptor(config)).build());
   }
 
   /**

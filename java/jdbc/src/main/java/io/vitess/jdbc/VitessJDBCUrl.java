@@ -145,33 +145,6 @@ public class VitessJDBCUrl {
 
         info = getURLParamProperties(m.group(12), info);
 
-        // Will add password property once its supported from vitess
-        // addParameterIfNew(Constants.Property.PASSWORD, m.group(5), info)
-        String keyspaceShard = m.group(8);
-        String dbName = m.group(10);
-
-        // keyspaceShard can contain just a keyspace, or have a shard suffix if it is quoted. Shard suffix is
-        // separated by a slash. If dbName is empty, use keyspace but don't include the shard suffix
-        if (!StringUtils.isNullOrEmptyWithoutWS(keyspaceShard)) {
-            char start = keyspaceShard.charAt(0);
-            if (start == keyspaceShard.charAt(keyspaceShard.length() - 1) &&
-                start == '\'' || start == '`' || start == '"') {
-                keyspaceShard = keyspaceShard.substring(1, keyspaceShard.length() - 1);
-                if (StringUtils.isNullOrEmptyWithoutWS(dbName)) {
-                    dbName = keyspaceShard;
-                    int idx = dbName.indexOf("/");
-                    if (idx != -1) {
-                        dbName = dbName.substring(0, idx);
-                    }
-                }
-            } else if (StringUtils.isNullOrEmptyWithoutWS(dbName)) {
-                dbName = keyspaceShard;
-            }
-        }
-
-        addParameterIfNew(Constants.Property.KEYSPACE, keyspaceShard, info);
-        addParameterIfNew(Constants.Property.DBNAME, dbName, info);
-
         String postUrl = m.group(6);
         if (null == postUrl) {
             throw new SQLException(Constants.SQLExceptionMessages.MALFORMED_URL);
@@ -249,31 +222,19 @@ public class VitessJDBCUrl {
                     }
                 }
 
-                addParameterIfNew(parameter, value, info);
+                // Per the mysql-connector-java docs, passed in Properties values should take precedence over
+                // those in the URL. See javadoc for NonRegisteringDriver#connect
+                if ((null != value && value.length() > 0) && (parameter.length() > 0) && null == info.getProperty(parameter)) {
+                    try {
+                        info.put(parameter, URLDecoder.decode(value, "UTF-8"));
+                    } catch (UnsupportedEncodingException | NoSuchMethodError badEncoding) {
+                        throw new SQLException(Constants.SQLExceptionMessages.MALFORMED_URL);
+                    }
+                }
             }
         }
 
         return info;
-    }
-
-    /**
-     * Per the mysql-connector-java docs, passed in Properties values should take precedence over
-     * those in the URL. See javadoc for NonRegisteringDriver#connect
-     * @param parameter
-     *          parameter to set if it doesn't already exist in the properties object
-     * @param value
-     *          value to set for the parameter
-     * @param info
-     *          properties object to set the value on
-     */
-    private static void addParameterIfNew(String parameter, String value, Properties info) throws SQLException {
-        if (!StringUtils.isNullOrEmptyWithoutWS(value) && null == info.getProperty(parameter)) {
-            try {
-                info.put(parameter, URLDecoder.decode(value, "UTF-8"));
-            } catch (UnsupportedEncodingException | NoSuchMethodError badEncoding) {
-                throw new SQLException(Constants.SQLExceptionMessages.MALFORMED_URL);
-            }
-        }
     }
 
     /**

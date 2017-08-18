@@ -180,6 +180,33 @@ public class VitessJDBCUrl {
         this.hostInfos = getURLHostInfos(postUrl);
         this.url = url;
 
+        // For Backward Compatibility of username in connection url.
+        String userName = m.group(3);
+        if (!StringUtils.isNullOrEmptyWithoutWS(userName)) {
+            info.setProperty(Constants.Property.USERNAME, userName);
+        }
+
+        // For Backward Compatibility of keyspace & catalog/database/schema name in connection url.
+        String keyspace = m.group(8);
+        if (!StringUtils.isNullOrEmptyWithoutWS(keyspace)) {
+            info.setProperty(Constants.Property.KEYSPACE, keyspace);
+            String catalog = m.group(10);
+            if (!StringUtils.isNullOrEmptyWithoutWS(catalog)) {
+                info.setProperty(Constants.Property.DBNAME, catalog);
+            } else {
+                info.setProperty(Constants.Property.DBNAME, keyspace);
+            }
+        }
+
+        // For Backward Compatibility of old tablet type.
+        String oldTabletType = info.getProperty(Constants.Property.OLD_TABLET_TYPE);
+        String tabletType = info.getProperty(Constants.Property.TABLET_TYPE);
+        if (null != tabletType) {
+            info.setProperty(Constants.Property.OLD_TABLET_TYPE, tabletType);
+        } else if (null != oldTabletType) {
+            info.setProperty(Constants.Property.TABLET_TYPE, oldTabletType);
+        }
+
         this.info = info;
     }
 

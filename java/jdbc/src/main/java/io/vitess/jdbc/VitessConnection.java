@@ -16,39 +16,6 @@
 
 package io.vitess.jdbc;
 
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.ClientInfoStatus;
-import java.sql.Clob;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.Executor;
-
-import io.vitess.client.VTGateConn;
-import io.vitess.client.VTGateTx;
-import io.vitess.proto.Vtgate;
-import io.vitess.util.CommonUtils;
-import io.vitess.util.Constants;
-import io.vitess.util.MysqlDefs;
-import io.vitess.client.Context;
-import io.vitess.client.VTGateConn;
-import io.vitess.client.VTGateTx;
-import io.vitess.util.CommonUtils;
-import io.vitess.util.Constants;
-import io.vitess.util.MysqlDefs;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;

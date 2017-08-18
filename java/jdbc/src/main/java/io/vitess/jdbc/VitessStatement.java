@@ -20,12 +20,10 @@ import java.sql.BatchUpdateException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLNonTransientException;
 import java.sql.SQLRecoverableException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -454,7 +452,7 @@ public class VitessStatement implements Statement {
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession(), vitessConnection.getIsSingleShard()).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 
@@ -594,7 +592,7 @@ public class VitessStatement implements Statement {
                 if (null == vtGateTx) {
                     Context context =
                         this.vitessConnection.createContext(this.queryTimeoutInMillis);
-                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession(), vitessConnection.getIsSingleShard()).checkedGet();
+                    vtGateTx = vtGateConn.begin(context, vitessConnection.getSession()).checkedGet();
                     this.vitessConnection.setVtGateTx(vtGateTx);
                 }
 
@@ -648,29 +646,6 @@ public class VitessStatement implements Statement {
     }
 
     /**
-<<<<<<< HEAD
-=======
-     * This method will execute Show Queries
-     *
-     * @param sql - Sql as input parameter
-     * @return Cursor
-     * @throws SQLException
-     */
-    protected Cursor executeShow(String sql) throws SQLException {
-        String keyspace = this.vitessConnection.getKeyspaceShard();
-        if (null == keyspace) {
-            throw new SQLNonTransientException(Constants.SQLExceptionMessages.NO_KEYSPACE);
-        }
-        //To Hit any single shard
-        List<byte[]> keyspaceIds = Arrays.asList(new byte[] {1});
-        Context context = this.vitessConnection.createContext(this.queryTimeoutInMillis);
-        return this.vitessConnection.getVtGateConn()
-            .executeKeyspaceIds(context, sql, keyspace, keyspaceIds, null,
-                this.vitessConnection.getTabletType(), vitessConnection.getIncludedFields(), vitessConnection.getSession()).checkedGet();
-    }
-
-    /**
->>>>>>> Support for new vtgate autocommit and shard targetting
      * This method returns the updateCounts array containing the status for each query
      * sent in the batch. If any of the query does return success.
      * It throws a BatchUpdateException.

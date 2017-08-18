@@ -31,8 +31,6 @@ import java.util.logging.Logger;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.vitess.client.Context;
 import io.vitess.client.RpcClient;
@@ -69,7 +67,7 @@ public class VitessVTGateManager {
          */
         public VTGateConnections(VitessConnection connection) {
             for (VitessJDBCUrl.HostInfo hostInfo : connection.getUrl().getHostInfos()) {
-                String identifier = getIdentifer(hostInfo.getHostname(), hostInfo.getPort(), connection.getUsername(), connection.getKeyspaceShard());
+                String identifier = getIdentifer(hostInfo.getHostname(), hostInfo.getPort(), connection.getUsername(), connection.getTarget());
                 synchronized (VitessVTGateManager.class) {
                     if (!vtGateConnHashMap.containsKey(identifier)) {
                         updateVtGateConnHashMap(identifier, hostInfo, connection);
@@ -210,7 +208,7 @@ public class VitessVTGateManager {
      */
     private static VTGateConn getVtGateConn(VitessJDBCUrl.HostInfo hostInfo, VitessConnection connection) {
         final String username = connection.getUsername();
-        final String keyspace = connection.getKeyspaceShard();
+        final String target = connection.getTarget();
         final Context context = CommonUtils.createContext(username,connection.getConnectionTimeoutMillis());
         RetryingInterceptorConfig retryingConfig = getRetryingInterceptorConfig(connection);
         RpcClient client;
@@ -241,7 +239,7 @@ public class VitessVTGateManager {
 
             return new RefreshableVTGateConn(
                 new GrpcClientFactory(retryingConfig).createTls(context, hostInfo.toString(), tlsOptions),
-                keyspace,
+                target,
                 hostInfo,
                 connection,
                 keyStorePath,
@@ -249,7 +247,7 @@ public class VitessVTGateManager {
         } else {
             return new VTGateConn(
                 new GrpcClientFactory(retryingConfig).create(context, hostInfo.toString()),
-                keyspace);
+                target);
         }
     }
 

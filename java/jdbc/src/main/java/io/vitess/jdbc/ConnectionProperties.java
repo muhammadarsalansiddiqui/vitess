@@ -138,6 +138,12 @@ public class ConnectionProperties {
         Constants.Property.INCLUDED_FIELDS,
         "What fields to return from MySQL to the Driver. Limiting the fields returned can improve performance, but ALL is required for maximum JDBC API support",
         Constants.DEFAULT_INCLUDED_FIELDS);
+    private EnumConnectionProperty<Query.ExecuteOptions.Workload> workload = new EnumConnectionProperty<>(
+        "workload",
+        "The workload type to use when executing queries",
+        Query.ExecuteOptions.Workload.UNSPECIFIED
+    );
+
     private BooleanConnectionProperty grpcRetriesEnabled = new BooleanConnectionProperty(
         "grpcRetriesEnabled",
         "If enabled, a gRPC interceptor will ensure retries happen in the case of TRANSIENT gRPC errors.",
@@ -235,10 +241,9 @@ public class ConnectionProperties {
     );
 
     // Caching of some hot properties to avoid casting over and over
-    private String keyspaceCache;
-    private boolean isSingleShardCache;
     private Topodata.TabletType tabletTypeCache;
     private Query.ExecuteOptions.IncludedFields includedFieldsCache;
+    private Query.ExecuteOptions.Workload workloadCache;
     private boolean includeAllFieldsCache = true;
     private boolean twopcEnabledCache = false;
     private boolean simpleExecuteTypeCache = true;
@@ -263,6 +268,7 @@ public class ConnectionProperties {
         this.tabletTypeCache = this.tabletType.getValueAsEnum();
         this.includedFieldsCache = this.includedFields.getValueAsEnum();
         this.includeAllFieldsCache = this.includedFieldsCache == Query.ExecuteOptions.IncludedFields.ALL;
+        this.workloadCache = this.workload.getValueAsEnum();
         this.twopcEnabledCache = this.twopcEnabled.getValueAsBoolean();
         this.simpleExecuteTypeCache = this.executeType.getValueAsEnum() == Constants.QueryExecuteType.SIMPLE;
         this.characterEncodingAsString = this.characterEncoding.getValueAsString();
@@ -386,6 +392,15 @@ public class ConnectionProperties {
         this.includedFields.setValue(includedFields);
         this.includedFieldsCache = includedFields;
         this.includeAllFieldsCache = includedFields == Query.ExecuteOptions.IncludedFields.ALL;
+    }
+
+    public Query.ExecuteOptions.Workload getWorkload() {
+        return this.workloadCache;
+    }
+
+    public void setWorkload(Query.ExecuteOptions.Workload workload) {
+        this.workload.setValue(workload);
+        this.workloadCache = workload;
     }
 
     public boolean getTwopcEnabled() {

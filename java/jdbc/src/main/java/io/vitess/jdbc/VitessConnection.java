@@ -101,7 +101,8 @@ public class VitessConnection extends ConnectionProperties implements Connection
                 Query.ExecuteOptions
                     .newBuilder()
                     .setClientFoundRows(!getUseAffectedRows())
-                    .setIncludedFields(getIncludedFields()))
+                    .setIncludedFields(getIncludedFields())
+                    .setWorkload(getWorkload()))
             .build();
     }
 

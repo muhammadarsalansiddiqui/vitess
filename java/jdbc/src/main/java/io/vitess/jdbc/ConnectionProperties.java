@@ -514,10 +514,7 @@ public class ConnectionProperties {
         this.treatUtilDateAsTimestamp.setValue(treatUtilDateAsTimestamp);
     }
 
-    public String getTarget() {
-        if(!StringUtils.isNullOrEmptyWithoutWS(target.getValueAsString())) {
-            return target.getValueAsString();
-        }
+    public String getKeyspaceShard() {
         String targetString = "";
         String keyspace = this.keyspace.getValueAsString();
         if(!StringUtils.isNullOrEmptyWithoutWS(keyspace)) {
@@ -527,6 +524,16 @@ public class ConnectionProperties {
                 targetString += ":" + shard;
             }
         }
+        return targetString;
+    }
+
+    public String getTarget() {
+        if(!StringUtils.isNullOrEmptyWithoutWS(target.getValueAsString())) {
+            return target.getValueAsString();
+        }
+
+        String targetString = getKeyspaceShard();
+
         String tabletType = this.tabletType.getValueAsEnum().name();
         if(!StringUtils.isNullOrEmptyWithoutWS(tabletType)) {
             targetString += "@" + tabletType.toLowerCase();

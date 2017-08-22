@@ -486,8 +486,12 @@ public class VTGateConn implements Closeable {
             new AsyncFunction<BeginResponse, VTGateTx>() {
               @Override
               public ListenableFuture<VTGateTx> apply(BeginResponse response) throws Exception {
+                Vtgate.Session resultSession = response.getSession();
+                if (session.hasOptions()) {
+                  resultSession = resultSession.toBuilder().setOptions(session.getOptions()).build();
+                }
                 return Futures.<VTGateTx>immediateFuture(
-                    new VTGateTx(client, response.getSession().toBuilder().setOptions(session.getOptions()).build(), keyspaceShard));
+                    new VTGateTx(client, resultSession, keyspaceShard));
               }
             },
             directExecutor()));

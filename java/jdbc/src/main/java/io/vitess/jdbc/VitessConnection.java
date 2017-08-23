@@ -334,7 +334,20 @@ public class VitessConnection extends ConnectionProperties implements Connection
      */
     public int getTransactionIsolation() throws SQLException {
         checkOpen();
-        return this.getMetaData().getDefaultTransactionIsolation();
+        switch (session.getOptions().getTransactionIsolation()) {
+            case DEFAULT:
+                return this.getMetaData().getDefaultTransactionIsolation();
+            case READ_COMMITTED:
+                return Connection.TRANSACTION_READ_COMMITTED;
+            case READ_UNCOMMITTED:
+                return Connection.TRANSACTION_READ_UNCOMMITTED;
+            case REPEATABLE_READ:
+                return Connection.TRANSACTION_REPEATABLE_READ;
+            case SERIALIZABLE:
+                return Connection.TRANSACTION_SERIALIZABLE;
+            default:
+                throw new SQLException(Constants.SQLExceptionMessages.ISOLATION_LEVEL_NOT_SUPPORTED);
+        }
     }
 
     /**
@@ -344,11 +357,11 @@ public class VitessConnection extends ConnectionProperties implements Connection
      * @throws SQLException
      */
     public void setTransactionIsolation(int level) throws SQLException {
-        /* Future Implementation of this method
         checkOpen();
-        if (null != this.vtGateTx) {
+        if (isInTransaction()) {
             try {
-                this.vtGateTx.rollback(this.context);
+                Context context = createContext(getTransactionTimeoutMillis());
+                this.vtGateTx.rollback(context);
             } catch (SQLException ex) {
                 throw new SQLException(ex);
             } finally {
@@ -358,9 +371,27 @@ public class VitessConnection extends ConnectionProperties implements Connection
         if (Connection.TRANSACTION_NONE == level || !getMetaData()
             .supportsTransactionIsolationLevel(level)) {
             throw new SQLException(Constants.SQLExceptionMessages.ISOLATION_LEVEL_NOT_SUPPORTED);
-        } */
-        throw new SQLFeatureNotSupportedException(
-            Constants.SQLExceptionMessages.SQL_FEATURE_NOT_SUPPORTED);
+        }
+
+        Query.ExecuteOptions.TransactionIsolation isolation;
+        switch (level) {
+            case Connection.TRANSACTION_READ_COMMITTED:
+                isolation = Query.ExecuteOptions.TransactionIsolation.READ_COMMITTED;
+                break;
+            case Connection.TRANSACTION_READ_UNCOMMITTED:
+                isolation = Query.ExecuteOptions.TransactionIsolation.READ_UNCOMMITTED;
+                break;
+            case Connection.TRANSACTION_REPEATABLE_READ:
+                isolation = Query.ExecuteOptions.TransactionIsolation.REPEATABLE_READ;
+                break;
+            case Connection.TRANSACTION_SERIALIZABLE:
+                isolation = Query.ExecuteOptions.TransactionIsolation.SERIALIZABLE;
+                break;
+            default:
+                    throw new SQLException(Constants.SQLExceptionMessages.ISOLATION_LEVEL_NOT_SUPPORTED);
+        }
+        Query.ExecuteOptions.Builder options = session.getOptions().toBuilder().setTransactionIsolation(isolation);
+        session = session.toBuilder().setOptions(options).build();
     }
 
     /**

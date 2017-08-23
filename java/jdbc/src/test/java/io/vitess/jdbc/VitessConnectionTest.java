@@ -16,21 +16,26 @@
 
 package io.vitess.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+
 import com.google.common.util.concurrent.Futures;
+
 import io.vitess.client.Context;
 import io.vitess.client.SQLFuture;
 import io.vitess.client.VTGateTx;
 import io.vitess.proto.Query;
 import io.vitess.proto.Topodata;
 import io.vitess.util.Constants;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.powermock.api.mockito.PowerMockito;
 
 /**
  * Created by harshit.gangal on 19/01/16.
@@ -216,5 +221,32 @@ public class VitessConnectionTest extends BaseTest {
         Assert.assertEquals(false, conn.isIncludeAllFields());
         Assert.assertEquals(Topodata.TabletType.REPLICA, conn.getTabletType());
         Assert.assertEquals(true, conn.getBlobsAreStrings());
+    }
+
+    @Test public void testTransactionIsolation() throws SQLException {
+        VitessConnection conn = Mockito.spy(getVitessConnection());
+        Mockito.doReturn(new DBProperties("random", "random", "random", Connection.TRANSACTION_REPEATABLE_READ, "random"))
+            .when(conn)
+            .getDbProperties();
+        Mockito.doReturn(new VitessMySQLDatabaseMetadata(conn)).when(conn).getMetaData();
+
+        Assert.assertEquals(Query.ExecuteOptions.TransactionIsolation.DEFAULT, conn.getSession().getOptions().getTransactionIsolation());
+        Assert.assertEquals(Connection.TRANSACTION_REPEATABLE_READ, conn.getTransactionIsolation());
+
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+        Assert.assertEquals(Query.ExecuteOptions.TransactionIsolation.READ_COMMITTED, conn.getSession().getOptions().getTransactionIsolation());
+        Assert.assertEquals(Connection.TRANSACTION_READ_COMMITTED, conn.getTransactionIsolation());
+
+        VTGateTx vtGateTx = Mockito.mock(VTGateTx.class);
+        Mockito.when(vtGateTx.rollback(Mockito.any(Context.class))).thenReturn(Mockito.mock(SQLFuture.class));
+        conn.setVtGateTx(vtGateTx);
+
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
+        Mockito.verify(vtGateTx).rollback(Mockito.any(Context.class));
+        Assert.assertEquals(Query.ExecuteOptions.TransactionIsolation.READ_UNCOMMITTED, conn.getSession().getOptions().getTransactionIsolation());
+        Assert.assertEquals(Connection.TRANSACTION_READ_UNCOMMITTED, conn.getTransactionIsolation());
+
     }
 }

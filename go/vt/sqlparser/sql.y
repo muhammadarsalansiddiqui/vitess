@@ -916,7 +916,7 @@ alter_statement:
   }
 | ALTER ignore_opt TABLE table_name REORGANIZE PARTITION sql_id INTO openb partition_definitions closeb
   {
-    $$ = &DDL{Action: ReorganizeStr, Table: $4, PartitionName: $7, PartitionDefinitions: $10}
+    $$ = &DDL{Action: AlterStr, Table: $4, AlterSpec: &AlterSpec{PartitionOperation: &PartitionOperation{PartitionName: $7, PartitionDefinitions: $10}}}
   }
 
 partition_definitions:

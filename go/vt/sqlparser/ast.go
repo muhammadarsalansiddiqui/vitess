@@ -502,22 +502,20 @@ func (node *Set) WalkSubtree(visit Visit) error {
 // Table is set for AlterStr, DropStr, RenameStr, ReorganizeStr
 // NewName is set for AlterStr, CreateStr, RenameStr.
 type DDL struct {
-	Action               string
-	Table                TableName
-	NewName              TableName
-	IfExists             bool
-	TableSpec            *TableSpec
-	PartitionName        ColIdent
-	PartitionDefinitions []*PartitionDefinition
+	Action    string
+	Table     TableName
+	NewName   TableName
+	IfExists  bool
+	TableSpec *TableSpec
+	AlterSpec *AlterSpec
 }
 
 // DDL strings.
 const (
-	CreateStr     = "create"
-	AlterStr      = "alter"
-	DropStr       = "drop"
-	RenameStr     = "rename"
-	ReorganizeStr = "reorganize"
+	CreateStr = "create"
+	AlterStr  = "alter"
+	DropStr   = "drop"
+	RenameStr = "rename"
 )
 
 // Format formats the node.
@@ -537,14 +535,11 @@ func (node *DDL) Format(buf *TrackedBuffer) {
 		buf.Myprintf("%s table%s %v", node.Action, exists, node.Table)
 	case RenameStr:
 		buf.Myprintf("%s table %v %v", node.Action, node.Table, node.NewName)
-	case ReorganizeStr:
-		buf.Myprintf("alter table %v reorganize partition %v into (", node.Table, node.PartitionName)
-		var prefix string
-		for _, pd := range node.PartitionDefinitions {
-			buf.Myprintf("%s%v", prefix, pd)
-			prefix = ", "
+	case AlterStr:
+		buf.Myprintf("alter table %v", node.Table)
+		if node.AlterSpec != nil {
+			buf.Myprintf(" %v", node.AlterSpec)
 		}
-		buf.Myprintf(")")
 	default:
 		buf.Myprintf("%s table %v", node.Action, node.Table)
 	}
@@ -560,6 +555,59 @@ func (node *DDL) WalkSubtree(visit Visit) error {
 		node.Table,
 		node.NewName,
 	)
+}
+
+// AlterSpec is the holder for the components of an alter statement.
+type AlterSpec struct {
+	PartitionOperation *PartitionOperation
+}
+
+// Format formats the alter statement.
+func (as *AlterSpec) Format(buf *TrackedBuffer) {
+	if as.PartitionOperation != nil {
+		buf.Myprintf("%v", as.PartitionOperation)
+	}
+}
+
+// WalkSubtree walks the subtree of the alter statement.
+func (as *AlterSpec) WalkSubtree(visit Visit) error {
+	if as == nil {
+		return nil
+	}
+	return Walk(visit, as.PartitionOperation)
+}
+
+// PartitionOperation is the holder for the components of an alter partition statement.
+type PartitionOperation struct {
+	PartitionName        ColIdent
+	PartitionDefinitions []*PartitionDefinition
+}
+
+// Format formats the partition operation.
+func (po *PartitionOperation) Format(buf *TrackedBuffer) {
+	buf.Myprintf("reorganize partition %v into (", po.PartitionName)
+	var prefix string
+	for _, pd := range po.PartitionDefinitions {
+		buf.Myprintf("%s%v", prefix, pd)
+		prefix = ", "
+	}
+	buf.Myprintf(")")
+}
+
+// WalkSubtree walks the subtree of the partition operation.
+func (po *PartitionOperation) WalkSubtree(visit Visit) error {
+	if po == nil {
+		return nil
+	}
+	if err := Walk(visit, po.PartitionName); err != nil {
+		return err
+	}
+	for _, pd := range po.PartitionDefinitions {
+		if err := Walk(visit, pd); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // PartitionDefinition describes a very minimal partition definition

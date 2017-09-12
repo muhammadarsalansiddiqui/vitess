@@ -36,6 +36,10 @@ import (
 	"github.com/youtube/vitess/go/vt/vtgate/masterbuffer"
 	"github.com/youtube/vitess/go/vt/vttablet/queryservice"
 
+	"bytes"
+	"encoding/json"
+	"net/http"
+
 	querypb "github.com/youtube/vitess/go/vt/proto/query"
 	topodatapb "github.com/youtube/vitess/go/vt/proto/topodata"
 	vtrpcpb "github.com/youtube/vitess/go/vt/proto/vtrpc"
@@ -48,6 +52,8 @@ var (
 	refreshInterval     = flag.Duration("tablet_refresh_interval", 1*time.Minute, "tablet refresh interval")
 	topoReadConcurrency = flag.Int("topo_read_concurrency", 32, "concurrent topo reads")
 	allowedTabletTypes  []topodatapb.TabletType
+
+	discoveryGatewayOnce sync.Once
 )
 
 const (
@@ -100,6 +106,10 @@ func createDiscoveryGateway(hc discovery.HealthCheck, topoServer topo.Server, se
 	// We set sendDownEvents=true because it's required by TabletStatsCache.
 	hc.SetListener(dg, true /* sendDownEvents */)
 
+	discoveryGatewayOnce.Do(func() {
+		http.Handle("/debug/gateway", dg)
+	})
+
 	log.Infof("loading tablets for cells: %v", *cellsToWatch)
 	for _, c := range strings.Split(*cellsToWatch, ",") {
 		if c == "" {
@@ -119,6 +129,21 @@ func createDiscoveryGateway(hc discovery.HealthCheck, topoServer topo.Server, se
 	}
 	dg.QueryService = queryservice.Wrap(dg, dg.withRetry)
 	return dg
+}
+
+// ServeHTTP is part of the http.Handler interface. It renders the current state of the discovery gateway tablet cache into json.
+func (dg *discoveryGateway) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	status := dg.CacheStatus()
+	b, err := json.MarshalIndent(status, "", " ")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	buf := bytes.NewBuffer(nil)
+	json.HTMLEscape(buf, b)
+	w.Write(buf.Bytes())
 }
 
 // StatsUpdate forwards HealthCheck updates to TabletStatsCache and MasterBuffer.

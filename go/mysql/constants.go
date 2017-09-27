@@ -529,6 +529,52 @@ var CharacterSetMap = map[string]uint8{
 	"eucjpms":  97,
 }
 
+// CommandMap maps the first byte of the mysql protocol to a String representation of the Command
+// Commands are defined in include/mysql/mysql_com.h
+var CommandMap = map[byte]string{
+	0x00: "COM_SLEEP",
+	0x01: "COM_QUIT",
+	0x02: "COM_INIT_DB",
+	0x03: "COM_QUERY",
+	0x04: "COM_FIELD_LIST",
+	0x05: "COM_CREATE_DB",
+	0x06: "COM_DROP_DB",
+	0x07: "COM_REFRESH",
+	0x08: "COM_SHUTDOWN",
+	0x09: "COM_STATISTICS",
+	0x10: "COM_PROCESS_INFO",
+	0x11: "COM_CONNECT",
+	0x12: "COM_PROCESS_KILL",
+	0x13: "COM_DEBUG",
+	0x14: "COM_PING",
+	0x15: "COM_TIME",
+	0x16: "COM_DELAYED_INSERT",
+	0x17: "COM_CHANGE_USER",
+	0x18: "COM_BINLOG_DUMP",
+	0x19: "COM_TABLE_DUMP",
+	0x20: "COM_CONNECT_OUT",
+	0x21: "COM_REGISTER_SLAVE",
+	0x22: "COM_STMT_PREPARE",
+	0x23: "COM_STMT_EXECUTE",
+	0x24: "COM_STMT_SEND_LONG_DATA",
+	0x25: "COM_STMT_CLOSE",
+	0x26: "COM_STMT_RESET",
+	0x27: "COM_SET_OPTION",
+	0x28: "COM_STMT_FETCH",
+	0x29: "COM_DAEMON",
+	0x30: "COM_RESERVED1",
+	0x31: "COM_RESERVED2",
+	0x32: "COM_RESERVED3",
+	0x33: "COM_RESERVED4",
+	0x34: "COM_RESERVED5",
+	0x35: "COM_RESERVED6",
+	0x36: "COM_RESERVED7",
+	0x37: "COM_RESERVED8",
+	0x38: "COM_RESERVED9",
+	0x39: "COM_BINLOG_DUMP2",
+	0x40: "COM_END",
+}
+
 // IsNum returns true if a MySQL type is a numeric value.
 // It is the same as IS_NUM defined in mysql.h.
 //

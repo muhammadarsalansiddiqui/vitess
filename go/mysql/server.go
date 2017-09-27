@@ -386,7 +386,13 @@ func (l *Listener) handle(conn net.Conn, connectionID uint32, acceptTime time.Ti
 				return
 			}
 		default:
-			log.Errorf("Got unhandled packet from %s, returning error: %v", c, data)
+			command, present := CommandMap[data[0]]
+			if present {
+				log.Errorf("received unhandled command %s from %s, returning error: %v", command, c, data)
+			} else {
+				log.Errorf("Got unhandled packet from %s, returning error: %v", c, data)
+			}
+
 			c.recycleReadPacket()
 			if err := c.writeErrorPacket(ERUnknownComError, SSUnknownComError, "command handling not implemented yet: %v", data[0]); err != nil {
 				log.Errorf("Error writing error packet to %s: %s", c, err)

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -30,6 +29,7 @@ import (
 
 	"github.com/youtube/vitess/go/mysql"
 	"github.com/youtube/vitess/go/sqltypes"
+	"github.com/youtube/vitess/go/stats"
 	"github.com/youtube/vitess/go/vt/callerid"
 	"github.com/youtube/vitess/go/vt/servenv"
 	"github.com/youtube/vitess/go/vt/vttls"
@@ -49,9 +49,11 @@ var (
 	mysqlSslKey  = flag.String("mysql_server_ssl_key", "", "Path to ssl key for mysql server plugin SSL")
 	mysqlSslCa   = flag.String("mysql_server_ssl_ca", "", "Path to ssl CA for mysql server plugin SSL. If specified, server will require and validate client certs.")
 
-	mysqlSlowConnectWarnThreshold = flag.Duration("mysql_slow_connect_warn_threshold", 0, "Warn if it takes more than the given threshold for a mysql connection to establish")
+	mysqlSlowConnectWarnThreshold   = flag.Duration("mysql_slow_connect_warn_threshold", 0, "Warn if it takes more than the given threshold for a mysql connection to establish")
+	mysqlConnectionDrainLogInterval = flag.Duration("mysql_connection_drain_log_interval", 2*time.Second, "Print the number of remaining connections on this interval during termination")
 
-	busyConnections int32
+	mysqlBusyConnectionCount = stats.NewInt("MysqlBusyConnectionCount")
+	conntrack                = NewConntrack(mysqlBusyConnectionCount)
 )
 
 // vtgateHandler implements the Listener interface.
@@ -68,21 +70,24 @@ func newVtgateHandler(vtg *VTGate) *vtgateHandler {
 }
 
 func (vh *vtgateHandler) NewConnection(c *mysql.Conn) {
+	conntrack.Update(c, false)
 }
 
 func (vh *vtgateHandler) ConnectionClosed(c *mysql.Conn) {
 	// Rollback if there is an ongoing transaction. Ignore error.
+	defer conntrack.Delete(c)
 	ctx := context.Background()
 	session, _ := c.ClientData.(*vtgatepb.Session)
 	if session != nil {
-		if session.InTransaction {
-			defer atomic.AddInt32(&busyConnections, -1)
-		}
 		_, _, _ = vh.vtg.Execute(ctx, session, "rollback", make(map[string]*querypb.BindVariable))
 	}
 }
 
 func (vh *vtgateHandler) ComQuery(c *mysql.Conn, query string, callback func(*sqltypes.Result) error) error {
+	var session *vtgatepb.Session
+	conntrack.Update(c, true)
+	defer conntrack.Update(c, session != nil && session.InTransaction)
+
 	// FIXME(alainjobart): Add some kind of timeout to the context.
 	ctx := context.Background()
 
@@ -98,7 +103,7 @@ func (vh *vtgateHandler) ComQuery(c *mysql.Conn, query string, callback func(*sq
 		"VTGate MySQL Connector" /* subcomponent: part of the client */)
 	ctx = callerid.NewContext(ctx, ef, im)
 
-	session, _ := c.ClientData.(*vtgatepb.Session)
+	session, _ = c.ClientData.(*vtgatepb.Session)
 	if session == nil {
 		session = &vtgatepb.Session{
 			Options: &querypb.ExecuteOptions{
@@ -110,15 +115,6 @@ func (vh *vtgateHandler) ComQuery(c *mysql.Conn, query string, callback func(*sq
 			session.Options.ClientFoundRows = true
 		}
 	}
-
-	if !session.InTransaction {
-		atomic.AddInt32(&busyConnections, 1)
-	}
-	defer func() {
-		if !session.InTransaction {
-			atomic.AddInt32(&busyConnections, -1)
-		}
-	}()
 
 	if c.SchemaName != "" {
 		session.TargetString = c.SchemaName
@@ -243,10 +239,20 @@ func init() {
 			mysqlUnixListener = nil
 		}
 
-		if atomic.LoadInt32(&busyConnections) > 0 {
-			log.Infof("Waiting for all client connections to be idle...")
-			for atomic.LoadInt32(&busyConnections) > 0 {
-				time.Sleep(1 * time.Millisecond)
+		log.Info("Draining %v mysql connection(s)...", conntrack.Size())
+		drainCh := make(chan bool)
+		go conntrack.Drain(drainCh)
+
+		ticker := time.NewTicker(*mysqlConnectionDrainLogInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				log.Infof("%v mysql connection(s) still open", conntrack.Size())
+			case <-drainCh:
+				log.Info("All mysql connections closed!")
+				break
 			}
 		}
 	})

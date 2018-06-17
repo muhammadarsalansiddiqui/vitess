@@ -19,6 +19,8 @@ package tabletmanager
 import (
 	"flag"
 	"fmt"
+	"os/exec"
+	"time"
 
 	"golang.org/x/net/context"
 	"vitess.io/vitess/go/vt/log"
@@ -35,8 +37,10 @@ import (
 // It is only enabled if restore_from_backup is set.
 
 var (
-	restoreFromBackup  = flag.Bool("restore_from_backup", false, "(init restore parameter) will check BackupStorage for a recent backup at startup and start there")
-	restoreConcurrency = flag.Int("restore_concurrency", 4, "(init restore parameter) how many concurrent files to restore at once")
+	restoreFromBackup      = flag.Bool("restore_from_backup", false, "(init restore parameter) will check BackupStorage for a recent backup at startup and start there")
+	postRestoreHook        = flag.String("post_restore_hook", "", "(init restore parameter) optional command to run after restore has succeeded")
+	postRestoreHookTimeout = flag.Duration("post_restore_hook_timeout", 15*time.Minute, "(init restore parameter) post-restore hook timeout")
+	restoreConcurrency     = flag.Int("restore_concurrency", 4, "(init restore parameter) how many concurrent files to restore at once")
 )
 
 // RestoreData is the main entry point for backup restore.
@@ -80,6 +84,14 @@ func (agent *ActionAgent) restoreDataLocked(ctx context.Context, logger logutil.
 	case nil:
 		// Starting from here we won't be able to recover if we get stopped by a cancelled
 		// context. Thus we use the background context to get through to the finish.
+
+		if *postRestoreHook != "" {
+			log.Infof("Running post-restore hook '%v' with a %v timeout", *postRestoreHook, *postRestoreHookTimeout)
+			if err := exec.CommandContext(context.WithTimeout(context.Background(), *postRestoreHookTimeout), *postRestoreHook).Run(); err != nil {
+				agent.refreshTablet(ctx, "post-restore hook failed")
+				return fmt.Errorf("Post-restore hook failed: %v", err)
+			}
+		}
 
 		// Reconnect to master.
 		if err := agent.startReplication(context.Background(), pos, originalType); err != nil {

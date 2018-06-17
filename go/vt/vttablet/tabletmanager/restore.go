@@ -87,10 +87,14 @@ func (agent *ActionAgent) restoreDataLocked(ctx context.Context, logger logutil.
 
 		if *postRestoreHook != "" {
 			log.Infof("Running post-restore hook '%v' with a %v timeout", *postRestoreHook, *postRestoreHookTimeout)
-			if err := exec.CommandContext(context.WithTimeout(context.Background(), *postRestoreHookTimeout), *postRestoreHook).Run(); err != nil {
-				agent.refreshTablet(ctx, "post-restore hook failed")
-				return fmt.Errorf("Post-restore hook failed: %v", err)
-			}
+			func() {
+				hookCtx, cancelFunc := context.WithTimeout(context.Background(), *postRestoreHookTimeout)
+				defer cancelFunc()
+				if err := exec.CommandContext(hookCtx, *postRestoreHook).Run(); err != nil {
+					agent.refreshTablet(ctx, "post-restore hook failed")
+					return fmt.Errorf("Post-restore hook failed: %v", err)
+				}
+			}()
 		}
 
 		// Reconnect to master.

@@ -27,6 +27,7 @@ import (
 	"vitess.io/vitess/go/sqltypes"
 	"vitess.io/vitess/go/vt/callerid"
 	"vitess.io/vitess/go/vt/grpcclient"
+	"vitess.io/vitess/go/vt/log"
 	"vitess.io/vitess/go/vt/vttablet/queryservice"
 	"vitess.io/vitess/go/vt/vttablet/tabletconn"
 
@@ -452,6 +453,7 @@ func (conn *gRPCQueryClient) BeginExecute(ctx context.Context, target *querypb.T
 		Options: options,
 	}
 	reply, err := conn.c.BeginExecute(ctx, req)
+	log.Infof("%#v", reply)
 	if err != nil {
 		return nil, 0, tabletconn.ErrorFromGRPC(err)
 	}

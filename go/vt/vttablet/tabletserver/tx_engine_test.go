@@ -42,7 +42,7 @@ func TestTxEngineClose(t *testing.T) {
 	// Normal close.
 	te.Open()
 	start := time.Now()
-	te.Close(false)
+	te.CloseGracefully()
 	if diff := time.Now().Sub(start); diff > 500*time.Millisecond {
 		t.Errorf("Close time: %v, must be under 0.5s", diff)
 	}
@@ -55,7 +55,7 @@ func TestTxEngineClose(t *testing.T) {
 	}
 	c.Recycle()
 	start = time.Now()
-	te.Close(false)
+	te.CloseGracefully()
 	if diff := time.Now().Sub(start); diff < 500*time.Millisecond {
 		t.Errorf("Close time: %v, must be over 0.5s", diff)
 	}
@@ -68,7 +68,7 @@ func TestTxEngineClose(t *testing.T) {
 	}
 	c.Recycle()
 	start = time.Now()
-	te.Close(true)
+	te.Close()
 	if diff := time.Now().Sub(start); diff > 500*time.Millisecond {
 		t.Errorf("Close time: %v, must be under 0.5s", diff)
 	}
@@ -82,7 +82,7 @@ func TestTxEngineClose(t *testing.T) {
 	}
 	c.Recycle()
 	start = time.Now()
-	te.Close(false)
+	te.CloseGracefully()
 	if diff := time.Now().Sub(start); diff > 500*time.Millisecond {
 		t.Errorf("Close time: %v, must be under 0.5s", diff)
 	}
@@ -107,7 +107,7 @@ func TestTxEngineClose(t *testing.T) {
 		te.txPool.LocalConclude(ctx, c)
 	}()
 	start = time.Now()
-	te.Close(false)
+	te.CloseGracefully()
 	if diff := time.Now().Sub(start); diff > 250*time.Millisecond {
 		t.Errorf("Close time: %v, must be under 0.25s", diff)
 	}
@@ -126,7 +126,7 @@ func TestTxEngineClose(t *testing.T) {
 		te.txPool.LocalConclude(ctx, c)
 	}()
 	start = time.Now()
-	te.Close(true)
+	te.Close()
 	if diff := time.Now().Sub(start); diff > 250*time.Millisecond {
 		t.Errorf("Close time: %v, must be under 0.25s", diff)
 	}

@@ -145,9 +145,11 @@ func (te *TxEngine) Open() {
 	te.isOpen = true
 }
 
-// CloseGracefully closes the TxEngine gracefully. It allows for all current
-// transactions to conclude. However, it will return an error if there are any
-// conditions preventing it from gracefully closing.
+// CloseGracefully closes the TxEngine gracefully.
+// It allows for all current transactions to conclude. However, it will return
+// an error if there are any conditions preventing it from gracefully closing.
+// If a shutdown grace period was specified, the transactions are rolled back if
+// they're not resolved by that time.
 func (te *TxEngine) CloseGracefully() error {
 	if !te.isOpen {
 		return nil
@@ -156,17 +158,17 @@ func (te *TxEngine) CloseGracefully() error {
 	if len(dbaTxns) > 0 {
 		return fmt.Errorf("uncommitted dba txns: %v", dbaTxns)
 	}
-	te.Close(false)
+	te.actuallyClose(false)
 	return nil
 }
 
-// Close closes the TxEngine. If the immediate flag is on,
-// then all current transactions are immediately rolled back.
-// Otherwise, the function waits for all current transactions
-// to conclude. If a shutdown grace period was specified,
-// the transactions are rolled back if they're not resolved
-// by that time.
-func (te *TxEngine) Close(immediate bool) {
+// Close closes the TxEngine.
+// All current transactions are immediately rolled back.
+func (te *TxEngine) Close() {
+	te.actuallyClose(true)
+}
+
+func (te *TxEngine) actuallyClose(immediate bool) {
 	if !te.isOpen {
 		return
 	}

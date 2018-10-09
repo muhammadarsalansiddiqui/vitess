@@ -538,7 +538,7 @@ func (tsv *TabletServer) serveNewType() (err error) {
 		// transactional requests are not allowed. So, we can
 		// be sure that the tx pool won't change after the wait.
 		tsv.beginRequests.Wait()
-		tsv.te.Close(true)
+		tsv.te.Close()
 		tsv.watcher.Open()
 		tsv.txThrottler.Close()
 
@@ -611,7 +611,7 @@ func (tsv *TabletServer) closeAll() {
 	tsv.messager.Close()
 	tsv.hr.Close()
 	tsv.hw.Close()
-	tsv.te.Close(true)
+	tsv.te.Close()
 	tsv.watcher.Close()
 	tsv.updateStreamList.Stop()
 	tsv.qe.Close()

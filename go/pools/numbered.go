@@ -151,6 +151,19 @@ func (nu *Numbered) GetAll() (vals []interface{}) {
 	return vals
 }
 
+// GetPersistentIds returns the list of all ids where timeout is not enforced
+func (nu *Numbered) GetPersistentIds() (ids []int64) {
+	nu.mu.Lock()
+	defer nu.mu.Unlock()
+	ids = make([]int64, 0)
+	for id, nw := range nu.resources {
+		if !nw.enforceTimeout {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
 // GetOutdated returns a list of resources that are older than age, and locks them.
 // It does not return any resources that are already locked.
 func (nu *Numbered) GetOutdated(age time.Duration, purpose string) (vals []interface{}) {

@@ -442,7 +442,9 @@ func (tsv *TabletServer) SetServingType(tabletType topodatapb.TabletType, servin
 		}
 		return true, nil
 	case actionGracefulStop:
-		tsv.gracefulStop()
+		if err := tsv.gracefulStop(); err != nil {
+			return false, err
+		}
 		return true, nil
 	}
 	panic("unreachable")
@@ -547,10 +549,13 @@ func (tsv *TabletServer) serveNewType() (err error) {
 	return nil
 }
 
-func (tsv *TabletServer) gracefulStop() {
+func (tsv *TabletServer) gracefulStop() error {
 	defer close(tsv.setTimeBomb())
-	tsv.waitForShutdown()
+	if err := tsv.waitForShutdown(); err != nil {
+		return err
+	}
 	tsv.transition(StateNotServing)
+	return nil
 }
 
 // StopService shuts down the tabletserver to the uninitialized state.
@@ -581,20 +586,23 @@ func (tsv *TabletServer) StopService() {
 	tsv.transition(StateNotConnected)
 }
 
-func (tsv *TabletServer) waitForShutdown() {
+func (tsv *TabletServer) waitForShutdown() error {
 	// Wait till beginRequests have completed before waiting on tx pool.
 	// During this state, new Begins are not allowed. After the wait,
 	// we have the assurance that only non-begin transactional calls
 	// will be allowed. They will enable the conclusion of outstanding
 	// transactions.
 	tsv.beginRequests.Wait()
+	if err := tsv.te.CloseGracefully(); err != nil {
+		return err
+	}
 	tsv.messager.Close()
-	tsv.te.Close(false)
 	tsv.qe.streamQList.TerminateAll()
 	tsv.updateStreamList.Stop()
 	tsv.watcher.Close()
 	tsv.requests.Wait()
 	tsv.txThrottler.Close()
+	return nil
 }
 
 // closeAll is called if TabletServer fails to start.

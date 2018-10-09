@@ -286,6 +286,11 @@ func (axp *TxPool) Get(transactionID int64, reason string) (*TxConnection, error
 	return v.(*TxConnection), nil
 }
 
+// GetDbaTxIDs fetches all transaction IDs enqueued with the dba workload
+func (axp *TxPool) GetDbaTxIDs() []int64 {
+	return axp.activePool.GetPersistentIds()
+}
+
 // LocalBegin is equivalent to Begin->Get.
 // It's used for executing transactions within a request. It's safe
 // to always call LocalConclude at the end.

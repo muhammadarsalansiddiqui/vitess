@@ -17,6 +17,7 @@ limitations under the License.
 package tabletserver
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -142,6 +143,21 @@ func (te *TxEngine) Open() {
 	}
 	te.startWatchdog()
 	te.isOpen = true
+}
+
+// CloseGracefully closes the TxEngine gracefully. It allows for all current
+// transactions to conclude. However, it will return an error if there are any
+// conditions preventing it from gracefully closing.
+func (te *TxEngine) CloseGracefully() error {
+	if !te.isOpen {
+		return nil
+	}
+	dbaTxns := te.txPool.GetDbaTxIDs()
+	if len(dbaTxns) > 0 {
+		return fmt.Errorf("uncommitted dba txns: %v", dbaTxns)
+	}
+	te.Close(false)
+	return nil
 }
 
 // Close closes the TxEngine. If the immediate flag is on,

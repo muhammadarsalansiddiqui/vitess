@@ -31,7 +31,7 @@ import io.vitess.util.Constants;
 
 public class ConnectionPropertiesTest {
 
-    private static final int NUM_PROPS = 39;
+    private static final int NUM_PROPS = 40;
 
     @Test
     public void testReflection() throws Exception {
@@ -154,8 +154,8 @@ public class ConnectionPropertiesTest {
         Assert.assertEquals("grpcRetriesInitialBackoffMillis", infos[7].name);
         Assert.assertEquals("grpcRetriesMaxBackoffMillis", infos[8].name);
         Assert.assertEquals(Constants.Property.INCLUDED_FIELDS, infos[9].name);
-        Assert.assertEquals(Constants.Property.TABLET_TYPE, infos[21].name);
-        Assert.assertEquals(Constants.Property.TWOPC_ENABLED, infos[29].name);
+        Assert.assertEquals(Constants.Property.TABLET_TYPE, infos[22].name);
+        Assert.assertEquals(Constants.Property.TWOPC_ENABLED, infos[30].name);
     }
 
     @Test

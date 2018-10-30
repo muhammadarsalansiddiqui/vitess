@@ -159,6 +159,10 @@ public class ConnectionProperties {
         "useAffectedRows",
         "Don't set the CLIENT_FOUND_ROWS flag when connecting to the server. The vitess default (useAffectedRows=true) is the opposite of mysql-connector-j.",
         true);
+    private BooleanConnectionProperty skipQueryPlanCache = new BooleanConnectionProperty(
+        "skipQueryPlanCache",
+        "Set the option to skip query plan caching",
+        false);
 
     private BooleanConnectionProperty grpcRetriesEnabled = new BooleanConnectionProperty(
         "grpcRetriesEnabled",
@@ -429,11 +433,21 @@ public class ConnectionProperties {
         setExecuteOptions();
     }
 
+    public boolean getSkipQueryPlanCache() {
+        return skipQueryPlanCache.getValueAsBoolean();
+    }
+
+    public void setSkipQueryPlanCache(boolean skipQueryPlanCache) {
+        this.skipQueryPlanCache.setValue(skipQueryPlanCache);
+        setExecuteOptions();
+    }
+
     private void setExecuteOptions() {
         this.executeOptionsCache = Query.ExecuteOptions.newBuilder()
             .setIncludedFields(getIncludedFields())
             .setWorkload(getWorkload())
             .setClientFoundRows(!getUseAffectedRows())
+            .setSkipQueryPlanCache(getSkipQueryPlanCache())
             .build();
     }
 

@@ -52,7 +52,7 @@ func (ascc *AuthServerClientCert) Negotiate(c *mysql.Conn, user string, remoteAd
 	// If not set, the vtgate will effectively deny all incoming mysql connections, since they will all lack certificates.
 	// For more info, check out go/vt/vtttls/vttls.go
 	certs := c.GetTLSClientCerts()
-	if certs == nil {
+	if certs == nil || len(certs) == 0 {
 		return nil, fmt.Errorf("no client certs for connection ID %v", c.ConnectionID)
 	}
 

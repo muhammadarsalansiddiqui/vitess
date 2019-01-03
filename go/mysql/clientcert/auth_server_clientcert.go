@@ -47,6 +47,10 @@ func (ascc *AuthServerClientCert) ValidateHash(salt []byte, user string, authRes
 
 // Negotiate is part of the AuthServer interface.
 func (ascc *AuthServerClientCert) Negotiate(c *mysql.Conn, user string, remoteAddr net.Addr) (mysql.Getter, error) {
+	// This code depends on the fact that golang's tls server enforces client cert verification.
+	// Note that the -mysql_server_ssl_ca flag must be set in order for the vtgate to accept client certs.
+	// If not set, the vtgate will effectively deny all incoming mysql connections, since they will all lack certificates.
+	// For more info, check out go/vt/vtttls/vttls.go
 	certs := c.GetTLSClientCerts()
 	if certs == nil {
 		return nil, fmt.Errorf("no client certs for connection ID %v", c.ConnectionID)

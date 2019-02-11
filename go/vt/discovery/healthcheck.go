@@ -512,6 +512,7 @@ func (hc *HealthCheckImpl) checkConn(hcc *healthCheckConn, name string) {
 	// Initial notification for downstream about the tablet existence.
 	hc.updateHealth(hcc.tabletStats.Copy(), hcc.conn)
 	hc.initialUpdatesWG.Done()
+	log.Infof("Healthcheck finished initial health on tablet: %v", name)
 
 	retryDelay := hc.retryDelay
 	for {
@@ -551,7 +552,7 @@ func (hc *HealthCheckImpl) checkConn(hcc *healthCheckConn, name string) {
 		}()
 
 		// Read stream health responses.
-		hcc.stream(streamCtx, hc, func(shr *querypb.StreamHealthResponse) error {
+		hcc.stream(streamCtx, hc, name, func(shr *querypb.StreamHealthResponse) error {
 			// We received a message. Reset the back-off.
 			retryDelay = hc.retryDelay
 			// Don't block on send to avoid deadlocks.
@@ -614,15 +615,18 @@ func (hcc *healthCheckConn) setServingState(serving bool, reason string) {
 }
 
 // stream streams healthcheck responses to callback.
-func (hcc *healthCheckConn) stream(ctx context.Context, hc *HealthCheckImpl, callback func(*querypb.StreamHealthResponse) error) {
+func (hcc *healthCheckConn) stream(ctx context.Context, hc *HealthCheckImpl, name string, callback func(*querypb.StreamHealthResponse) error) {
 	if hcc.conn == nil {
+		log.Infof("Healthcheck streaming creating conn on tablet: %v", name)
 		conn, err := tabletconn.GetDialer()(hcc.tabletStats.Tablet, grpcclient.FailFast(true))
 		if err != nil {
+			log.Errorf("Healthcheck streaming error on tablet: %v", name)
 			hcc.tabletStats.LastError = err
 			return
 		}
 		hcc.conn = conn
 		hcc.tabletStats.LastError = nil
+		log.Infof("Healthcheck streaming finished conn on tablet: %v", name)
 	}
 
 	if err := hcc.conn.StreamHealth(ctx, callback); err != nil {
@@ -633,6 +637,7 @@ func (hcc *healthCheckConn) stream(ctx context.Context, hc *HealthCheckImpl, cal
 		hcc.conn.Close(ctx)
 		hcc.conn = nil
 	}
+	log.Errorf("Healthcheck streaming returned result on tablet: %v", name)
 }
 
 // processResponse reads one health check response, and notifies HealthCheckStatsListener.
@@ -720,6 +725,7 @@ func (hc *HealthCheckImpl) SetListener(listener HealthCheckStatsListener, sendDo
 // It does not block on making connection.
 // name is an optional tag for the tablet, e.g. an alternative address.
 func (hc *HealthCheckImpl) AddTablet(tablet *topodatapb.Tablet, name string) {
+	log.Infof("Healthcheck adding tablet: %v", name)
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	key := TabletToMapKey(tablet)
 	hcc := &healthCheckConn{
@@ -751,6 +757,7 @@ func (hc *HealthCheckImpl) AddTablet(tablet *topodatapb.Tablet, name string) {
 	hc.connsWG.Add(1)
 	hc.mu.Unlock()
 
+	log.Infof("Healthcheck starting check on tablet: %v", name)
 	go hc.checkConn(hcc, name)
 }
 

@@ -44,6 +44,7 @@ import (
 	"hash/crc32"
 	"html/template"
 	"net/http"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -372,6 +373,8 @@ func NewHealthCheck(retryDelay, healthCheckTimeout time.Duration) HealthCheck {
 	healthcheckOnce.Do(func() {
 		http.Handle("/debug/gateway", hc)
 	})
+
+	runtime.SetMutexProfileFraction(5)
 
 	return hc
 }

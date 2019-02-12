@@ -513,6 +513,7 @@ func (hc *HealthCheckImpl) checkConn(hcc *healthCheckConn, name string) {
 	defer hc.finalizeConn(hcc)
 
 	// Initial notification for downstream about the tablet existence.
+	log.Infof("Healthcheck started initial health on tablet: %v", name)
 	hc.updateHealth(hcc.tabletStats.Copy(), hcc.conn)
 	hc.initialUpdatesWG.Done()
 	log.Infof("Healthcheck finished initial health on tablet: %v", name)

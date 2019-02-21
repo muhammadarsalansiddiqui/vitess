@@ -173,15 +173,18 @@ func (ts *Server) GetShard(ctx context.Context, keyspace, shard string) (*ShardI
 	span.Annotate("keyspace", keyspace)
 	span.Annotate("shard", shard)
 	defer span.Finish()
+	log.Infof("Entering getshard.")
 
 	shardPath := path.Join(KeyspacesPath, keyspace, ShardsPath, shard, ShardFile)
 	data, version, err := ts.globalCell.Get(ctx, shardPath)
 	if err != nil {
+		log.Infof("Error should be here here.")
 		return nil, err
 	}
 
 	value := &topodatapb.Shard{}
 	if err = proto.Unmarshal(data, value); err != nil {
+		log.Infof("Jacob why are you so bad at computers?")
 		return nil, fmt.Errorf("GetShard(%v,%v): bad shard data: %v", keyspace, shard, err)
 	}
 	return &ShardInfo{

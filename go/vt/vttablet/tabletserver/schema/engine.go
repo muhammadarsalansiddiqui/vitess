@@ -493,6 +493,7 @@ func (se *Engine) ServeHTTP(response http.ResponseWriter, request *http.Request)
 func (se *Engine) handleHTTPSchema(response http.ResponseWriter, request *http.Request) {
 	// Ensure schema engine is Open. If vttablet came up in a non_serving role,
 	// the schema engine may not have been initialized.
+	log.Infof("Attempting to ensure schema engine is open.")
 	err := se.Open()
 	if err != nil {
 		response.Write([]byte(err.Error()))

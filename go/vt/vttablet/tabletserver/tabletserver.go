@@ -152,12 +152,12 @@ type TabletServer struct {
 	// for health checks. This does not affect how queries are served.
 	// target specifies the primary target type, and also allow specifies
 	// secondary types that should be additionally allowed.
-	mu            sync.Mutex
-	state         int64
-	lameduck      sync2.AtomicInt32
-	target        querypb.Target
-	alsoAllow     []topodatapb.TabletType
-	requests      sync.WaitGroup
+	mu        sync.Mutex
+	state     int64
+	lameduck  sync2.AtomicInt32
+	target    querypb.Target
+	alsoAllow []topodatapb.TabletType
+	requests  sync.WaitGroup
 
 	// The following variables should be initialized only once
 	// before starting the tabletserver.
@@ -229,7 +229,7 @@ type TxPoolController interface {
 	AcceptReadOnly() error
 
 	// InitDBConfig must be called before Init.
-  InitDBConfig(dbcfgs *dbconfigs.DBConfigs)
+	InitDBConfig(dbcfgs *dbconfigs.DBConfigs)
 
 	// Init must be called once when vttablet starts for setting
 	// up the metadata tables.
@@ -713,7 +713,7 @@ func (tsv *TabletServer) CheckMySQL() {
 		if tsv.isMySQLReachable() {
 			return
 		}
-		log.Info("Check MySQL failed. Shutting down query service")
+		log.Infof("Check MySQL failed. Shutting down query service")
 		tsv.StopService()
 	}()
 }
@@ -722,6 +722,7 @@ func (tsv *TabletServer) CheckMySQL() {
 // The function returns false only if the query service is
 // in StateServing or StateNotServing.
 func (tsv *TabletServer) isMySQLReachable() bool {
+	log.Infof("Checking if mysql is reachable.")
 	tsv.mu.Lock()
 	switch tsv.state {
 	case StateServing:
